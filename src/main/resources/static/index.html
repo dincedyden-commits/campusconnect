@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusConnect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body data-page="home">
+    <div id="app">
+
+        <div class="top-header">
+            <div class="logo-lockup">
+                <div class="logo-mark cc-hook-logo"><span>C</span><span>C</span></div>
+                <div class="logo-word">Campus<span>Connect</span></div>
+            </div>
+            <div class="header-icons">
+                <a class="icon-btn" href="/notifications.html" title="Notifications" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg></a>
+            </div>
+        </div>
+
+        <div style="flex:1;display:flex;flex-direction:column;">
+            <div class="cc-page-banner">
+                <h1>CampusConnect</h1>
+                <p>Your campus. Your people. Your conversations.</p>
+            </div>
+            <div class="status-strip"><button class="status-me status-create" id="my-status-button" onclick="openStatusPicker()"><span class="status-avatar">+</span><span class="status-copy"><b>Your status</b><small>Share a photo, video or text</small></span></button>
+                <div id="status-list" class="status-list"></div>
+            </div>
+            <div class="feed-toolbar">
+                <div><strong>Campus feed</strong><span>Latest from your community</span></div><button class="cc-ai-tab gemini-icon-btn" onclick="openGemini()" aria-label="Open Gemini" title="Gemini">
+<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2c1.2 7.1 4.9 11.8 14 14-9.1 2.2-12.8 5.9-14 14-1.2-8.1-4.9-11.8-14-14C11.1 13.8 14.8 9.1 16 2Z"/></svg></button></div>
+            <div class="feed-tabs" role="tablist" aria-label="Feed">
+                <button class="feed-tab active" id="feed-for-you" onclick="switchFeed('for-you')">For You</button>
+                <button class="feed-tab" id="feed-following" onclick="switchFeed('following')">Following</button>
+            </div>
+            <div class="composer-strip composer-top">
+                <div class="avatar sm">·</div>
+                <button class="composer-fake-input" onclick="openComposer()">Share something with your campus…</button>
+                <button class="icon-btn" onclick="openComposer()"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+            <section class="student-features" aria-label="Student features">
+                <div class="section-heading"><strong>Campus tools</strong><span>Quick access</span></div>
+                <div class="feature-grid">
+                    <a class="feature-tile" href="/communities.html"><span>👥</span><b>Communities</b><small>Groups & channels</small></a>
+                    <a class="feature-tile market-feature-tile" href="/marketplace.html"><span class="market-feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18l-1.5-6h-15L3 10Z"/><path d="M5 10v10h14V10M9 20v-6h6v6M3 10a3 3 0 006 0 3 3 0 006 0 3 3 0 006 0"/></svg></span><b>Marketplace</b><small>Buy & sell</small></a>
+                    <a class="feature-tile" href="/events.html"><span>📅</span><b>Events</b><small>Campus activities</small></a>
+                    <a class="feature-tile" href="/lost-found.html"><span>🔎</span><b>Lost & Found</b><small>Report or find items</small></a>
+                    <a class="feature-tile" href="/polls.html"><span>📊</span><b>Polls</b><small>Ask your campus</small></a><a class="feature-tile live-tile" href="/live.html"><span>🔵</span><span class="live-pill">LIVE</span><b>CampusConnect Live</b><small>Join live campus moments</small></a>
+                </div>
+            </section>
+            <div id="feed-container"></div>
+        </div>
+
+        <div id="gemini-panel" class="cc-ai-panel" aria-hidden="true">
+            <div class="cc-ai-head"><strong class="gemini-brand"><svg viewBox="0 0 32 32"><path d="M16 2c1.2 7.1 4.9 11.8 14 14-9.1 2.2-12.8 5.9-14 14-1.2-8.1-4.9-11.8-14-14C11.1 13.8 14.8 9.1 16 2Z"/></svg> Gemini</strong><button onclick="closeGemini()">×</button></div>
+            <div id="gemini-answer" class="cc-ai-answer">Ask Gemini about university life, posts, events or study topics.</div>
+            <div class="cc-ai-input"><input id="gemini-input" maxlength="1200" placeholder="Ask a question…"><button class="btn btn-primary btn-auto" onclick="sendGemini()">Ask</button></div>
+        </div>
+        <nav class="bottom-nav" aria-label="Primary navigation">
+            <a class="nav-item" data-nav="home" href="/index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg><span>Home</span></a>
+            <a class="nav-item" data-nav="search" href="/search.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.2-4.2"/></svg><span>Search</span></a>
+            <button class="nav-item nav-post" data-nav="post" onclick="location.href='/index.html?compose=1'" aria-label="Create post"><span class="post-plus"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span><span>Post</span></button>
+            <a class="nav-item nav-chat-icon" data-nav="chats" href="/chats.html" aria-label="Open chats"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5.5A2.5 2.5 0 0 1 5.5 3h10A2.5 2.5 0 0 1 18 5.5v6A2.5 2.5 0 0 1 15.5 14H10l-4.5 4v-4.1A2.5 2.5 0 0 1 3 11.5v-6Z"/><path d="M9 7h5M7 10h7"/></svg><span>Chats</span></a>
+            <button class="nav-item nav-ai" data-nav="ai" onclick="if(typeof openGemini==='function'){openGemini()}else{location.href='/chats.html?ai=1'}" aria-label="Open Campus AI"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7L12 3Z"/><path d="m19 16 .7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16Z"/></svg><span>Campus AI</span></button>
+            <a class="nav-item" data-nav="profile" href="/profile.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.5-4.4 3.2-7 8-7s7.5 2.6 8 7"/><path d="M19 3.8v3.4M17.3 5.5h3.4"/></svg><span>Profile</span></a>
+        </nav>
+
+        <div class="modal-overlay" id="status-modal">
+            <div class="modal-sheet">
+                <div class="modal-head">
+                    <h3>New status</h3><button onclick="closeStatusPicker()">✕</button></div><textarea id="status-text" maxlength="280" placeholder="Write a status…" style="width:100%;min-height:90px;margin-top:8px;padding:12px;border:1px solid var(--line);border-radius:12px;resize:vertical"></textarea>
+                <input id="status-file" type="file" accept="image/*,video/*" capture="environment"><input id="status-caption" maxlength="280" placeholder="Add a caption…" style="width:100%;margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:12px">
+                <div class="modal-actions"><button class="btn btn-ghost btn-auto" onclick="closeStatusPicker()">Cancel</button><button class="btn btn-primary btn-auto" onclick="submitStatus()">Share status</button></div>
+            </div>
+        </div>
+        <div class="modal-overlay" id="composer-modal">
+            <div class="modal-sheet composer-modal-sheet">
+                <div class="modal-head">
+                    <h3>New post</h3><button onclick="closeComposer()" style="font-size:20px;color:var(--ink-soft);">✕</button></div>
+                <div style="display:flex;gap:10px;">
+                    <div class="avatar sm">·</div>
+                    <textarea class="composer-textarea" id="composer-text" placeholder="What's happening on campus?"></textarea>
+                </div>
+                <div style="margin-top:10px"><input id="composer-file" type="file" accept="image/*,video/*" capture="environment"></div>
+                <div class="modal-actions">
+                    <div id="posting-as" style="flex:1;font-size:12px;color:var(--ink-faint);">Posting…</div>
+                    <button class="btn btn-primary btn-auto" id="composer-submit-btn" onclick="submitPost()">Post</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="toast-host"></div>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script>
+        let activeFeedMode = 'for-you';
+        async function loadFeed(mode = activeFeedMode) {
+            const u = await requireLogin();
+            if (!u) return;
+            activeFeedMode = mode;
+            const postingAs = document.getElementById('posting-as');
+            if (postingAs) postingAs.textContent = 'Posting as @' + u.username;
+            const c = document.getElementById('feed-container');
+            c.innerHTML = skeletonPosts(3);
+            const r = await apiFetch('/api/posts?mode=' + encodeURIComponent(mode));
+            if (!r.ok) {
+                c.innerHTML = notConnectedStateHTML();
+                return
+            }
+            c.innerHTML = r.data.length ? r.data.map(postCardHTML).join('') : emptyStateHTML({
+                icon: ICONS.posts,
+                title: mode === 'following' ? 'No posts from people you follow' : 'No posts yet',
+                body: mode === 'following' ? 'Follow students to build your personal campus feed.' : 'Be the first to share something with your campus.',
+                ctaLabel: mode === 'following' ? 'Find students' : 'Create a post',
+                ctaOnclick: mode === 'following' ? 'location.href="/search.html"' : 'openComposer()'
+            });
+            enableFeedVideoAutoplay(c);
+        }
+        async function switchFeed(mode) {
+            document.querySelectorAll('.feed-tab').forEach(b => b.classList.toggle('active', b.id === 'feed-' + mode.replace('-', '-')));
+            await loadFeed(mode);
+        }
+        async function prependNewPost(p) {
+            const c = document.getElementById('feed-container');
+            const empty = c.querySelector('.empty-state');
+            if (empty) empty.remove();
+            const holder = document.createElement('div');
+            holder.innerHTML = postCardHTML(p);
+            c.prepend(holder.firstElementChild);
+            enableFeedVideoAutoplay(c);
+            toast('Post published');
+        }
+        window.onPostCreated = prependNewPost;
+        async function loadStatuses() {
+            const r = await apiFetch('/api/statuses');
+            const box = document.getElementById('status-list');
+            if (!r.ok) {
+                box.innerHTML = '';
+                return
+            }
+            const mine = r.data.find(st => Number(st.userId || st.authorId || 0) === Number(CURRENT_USER_ID) || String(st.username || '') === String(CURRENT_USER?.username || ''));
+            const mineBtn = document.getElementById('my-status-button');
+            if (mineBtn && mine) {
+                mineBtn.classList.add('has-status');
+                mineBtn.innerHTML = `<span class="status-ring"><span class="status-avatar">${CURRENT_USER?.profilePictureUrl?`<img src="${escapeHtml(CURRENT_USER.profilePictureUrl)}">`:'+'}</span></span><span class="status-plus">+</span>`;mineBtn.title='Add to your status';}box.innerHTML=r.data.filter(st=>!mine||Number(st.id)!==Number(mine.id)).slice(0,12).map(st=>`<button class="status-item" onclick="viewStatus(${st.id})"><span class="status-ring"><span class="status-avatar small">${st.profilePictureUrl?`<img src="${escapeHtml(st.profilePictureUrl)}">`:escapeHtml((st.username||'?')[0].toUpperCase())}</span></span><span class="status-name">${escapeHtml(st.fullName||st.name||st.username||'Student')}</span><span class="status-handle">@${escapeHtml(st.username||'user')}</span></button>`).join('')}
+function openStatusPicker(){document.getElementById('status-modal').classList.add('show')}
+function closeStatusPicker(){document.getElementById('status-modal').classList.remove('show')}
+async function submitStatus(){const file=document.getElementById('status-file').files?.[0];const text=document.getElementById('status-text').value.trim();const caption=document.getElementById('status-caption').value.trim();if(!file&&!text&&!caption)return toast('Write something or choose media first',true);let mediaUrl='',mediaType='';if(file){if(file.size>50*1024*1024)return toast('Media must be 50MB or smaller',true);if(file.type.startsWith('video/')){const v=document.createElement('video');v.preload='metadata';v.src=URL.createObjectURL(file);await new Promise(resolve=>v.onloadedmetadata=resolve);if(v.duration>120){URL.revokeObjectURL(v.src);return toast('Status videos must be 2 minutes or shorter',true)}URL.revokeObjectURL(v.src)}const f=new FormData();f.append('file',file);const up=await apiFetch('/api/upload',{method:'POST',body:f});if(!up.ok)return toast(up.data?.message||'Upload failed',true);mediaUrl=up.data.url;mediaType=up.data.type||file.type;}const r=await apiFetch('/api/statuses',{method:'POST',body:JSON.stringify({mediaUrl,mediaType,caption:text||caption})});if(r.ok){closeStatusPicker();document.getElementById('status-file').value='';document.getElementById('status-text').value='';document.getElementById('status-caption').value='';toast('Status shared');loadStatuses()}else toast(r.data?.message||'Could not share status',true)}
+async function viewStatus(id){const r=await apiFetch('/api/statuses');const st=r.data?.find(x=>Number(x.id)===Number(id));if(!st)return;const w=window.open('','_blank','width=480,height=720');if(!w)return;w.document.write(`<title>@${escapeHtml(st.username)} · Status</title><style>body{margin:0;background:#111;color:#fff;font-family:Arial;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;text-align:center;padding:24px;box-sizing:border-box}img,video{max-width:92%;max-height:72vh;border-radius:16px}p{max-width:90%;font-size:20px;line-height:1.5}</style>${st.mediaUrl?(st.mediaType?.startsWith('video/')?`<video controls autoplay src="${escapeHtml(st.mediaUrl)}"></video>`:`<img src="${escapeHtml(st.mediaUrl)}">`):''}<p>@${escapeHtml(st.username)} ${escapeHtml(st.caption||'')}</p>`);w.document.close();if(!st.mediaType?.startsWith('video/'))setTimeout(()=>{try{w.close()}catch(e){}},5000)}
+function openGemini(){document.getElementById('gemini-panel')?.classList.add('show');document.getElementById('gemini-panel')?.setAttribute('aria-hidden','false');document.getElementById('gemini-input')?.focus()}
+function closeGemini(){document.getElementById('gemini-panel')?.classList.remove('show');document.getElementById('gemini-panel')?.setAttribute('aria-hidden','true')}
+async function sendGemini(){const i=document.getElementById('gemini-input'),a=document.getElementById('gemini-answer'),q=i?.value.trim();if(!q)return;i.value='';a.textContent='Thinking…';const r=await apiFetch('/api/ai/ask',{method:'POST',body:JSON.stringify({prompt:q})});a.textContent=r.ok?(r.data?.response||'No response.'):(r.data?.message||'Gemini is unavailable. Check the Gemini API configuration.')}
+loadFeed();loadStatuses();if(new URLSearchParams(location.search).get('compose')==='1'){setTimeout(openComposer,250)}
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,10 @@
+package com.campusconnect.campusconnect.controller;
+import com.campusconnect.campusconnect.entity.*; import com.campusconnect.campusconnect.repository.*; import org.springframework.web.bind.annotation.*; import jakarta.servlet.http.HttpSession; import java.util.*;
+@RestController @RequestMapping("/api/comments")
+public class CommentController {
+ final CommentRepository comments; final PostRepository posts; final UserRepository users; final NotificationRepository notifications;
+ public CommentController(CommentRepository c,PostRepository p,UserRepository u,NotificationRepository n){comments=c;posts=p;users=u;notifications=n;}
+ private Long me(HttpSession s){Object x=s.getAttribute("userId");if(x==null)throw new IllegalArgumentException("Log in first");return ((Number)x).longValue();}
+ @GetMapping("/post/{postId}") public List<Map<String,Object>> list(@PathVariable Long postId){return comments.findByPost_IdOrderByCreatedAtAsc(postId).stream().map(c->{Map<String,Object> m=new LinkedHashMap<>();m.put("id",c.getId());m.put("content",c.getContent());m.put("username",c.getUser().getUsername());m.put("createdAt",c.getCreatedAt());return m;}).collect(java.util.stream.Collectors.toList());}
+ @PostMapping("/post/{postId}") public Map<String,Object> add(@PathVariable Long postId,@RequestBody Map<String,String> body,HttpSession s){Long uid=me(s);String text=body.getOrDefault("content","").trim();if(text.isEmpty()||text.length()>1000)throw new IllegalArgumentException("Comment must contain 1-1000 characters");Post p=posts.findById(postId).orElseThrow();User u=users.findById(uid).orElseThrow();Comment c=new Comment();c.setPost(p);c.setUser(u);c.setContent(text);comments.save(c);if(!p.getAuthor().getId().equals(uid)){Notification n=new Notification();n.setUser(p.getAuthor());n.setType("comment");n.setMessage("@"+u.getUsername()+" commented on your post");notifications.save(n);}Map<String,Object> out=new LinkedHashMap<>();out.put("id",c.getId());out.put("content",c.getContent());out.put("username",u.getUsername());out.put("createdAt",c.getCreatedAt());return out;}
+}

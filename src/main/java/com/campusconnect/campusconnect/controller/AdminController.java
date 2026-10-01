@@ -1,0 +1,11 @@
+package com.campusconnect.campusconnect.controller;
+import com.campusconnect.campusconnect.repository.*; import com.campusconnect.campusconnect.entity.User; import jakarta.servlet.http.HttpSession; import org.springframework.web.bind.annotation.*; import java.util.*;
+@RestController @RequestMapping("/api/admin") public class AdminController { private final UserRepository users; private final PostRepository posts; private final MessageRepository messages; private final CommunityRepository communities; private final ListingRepository listings; private final NotificationRepository notifications; public AdminController(UserRepository u,PostRepository p,MessageRepository m,CommunityRepository c,ListingRepository l,NotificationRepository n){users=u;posts=p;messages=m;communities=c;listings=l;notifications=n;} private User admin(HttpSession s){Object id=s.getAttribute("userId");if(id==null)throw new IllegalArgumentException("Log in first");User u=users.findById(((Number)id).longValue()).orElseThrow();if(!"ADMIN".equalsIgnoreCase(u.getRole())&&!"campusconnect".equalsIgnoreCase(u.getUsername()))throw new IllegalArgumentException("Admin access required");return u;} @GetMapping("/stats") public Map<String,Object> stats(HttpSession s){admin(s);return new LinkedHashMap<>(Map.of("users",users.count(),"posts",posts.count(),"messages",messages.count(),"communities",communities.count(),"marketplaceListings",listings.count(),"notifications",notifications.count()));} @GetMapping("/users") public List<Map<String,Object>> userList(HttpSession s){admin(s);return users.findAll().stream().sorted(Comparator.comparing(User::getCreatedAt,Comparator.nullsLast(Comparator.reverseOrder()))).limit(100) .map(u -> {
+                Map<String, Object> data = new LinkedHashMap<>();
+                data.put("id", u.getId());
+                data.put("username", u.getUsername());
+                data.put("fullName", u.getFullName());
+                data.put("role", u.getRole());
+                data.put("createdAt", u.getCreatedAt() == null ? "" : u.getCreatedAt().toString());
+                return data;
+            }).toList();} }

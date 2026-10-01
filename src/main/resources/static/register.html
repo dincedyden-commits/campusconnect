@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create your account — CampusConnect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/styles.css">
+<style>.auth-wrap{padding:0 26px 40px;display:flex;flex-direction:column;min-height:100vh;}
+.auth-top{padding-top:44px;padding-bottom:26px;}
+.auth-h1{font-family:var(--font-display);font-weight:700;font-size:26px;letter-spacing:-.02em;margin-bottom:6px;}
+.auth-sub{color:var(--ink-soft);font-size:14px;line-height:1.5;margin-bottom:26px;}
+.auth-foot{margin-top:auto;padding-top:24px;text-align:center;font-size:14px;color:var(--ink-soft);}</style>
+</head>
+<body data-page="register" class="auth-page">
+<div id="app">
+<div class="auth-wrap">
+  <div class="auth-top">
+    <div class="logo-lockup" style="margin-bottom:30px;"><div class="logo-mark"></div><div class="logo-word">Campus<span>Connect</span></div></div>
+    <h1 class="auth-h1">Join your campus</h1>
+    <p class="auth-sub">You'll show up everywhere as your username, not your full name.</p>
+  </div>
+
+  <div id="register-error" class="auth-error hidden"></div>
+
+  <div class="field">
+    <label for="reg-username">Username</label>
+    <div class="field-input-wrap">
+      <span class="at-prefix">@</span>
+      <input id="reg-username" class="has-at" type="text" placeholder="yourname" autocomplete="off">
+    </div>
+    <div class="field-hint" id="reg-username-hint">3–20 characters: letters, numbers, underscores.</div>
+  </div>
+  <div class="field">
+    <label for="reg-fullname">Full name</label>
+    <input id="reg-fullname" type="text" placeholder="Full name (shown only on your profile)">
+  </div>
+  <div class="field">
+    <label for="reg-email">University email</label>
+    <input id="reg-email" type="email" placeholder="you@university.edu">
+    <div class="field-hint" id="reg-email-hint"></div>
+  </div>
+  <div class="field">
+    <label for="reg-university">University</label>
+    <input id="reg-university" type="text" placeholder="Your university">
+  </div>
+  <div class="field">
+    <label for="reg-pw">Password</label>
+    <div class="field-input-wrap">
+      <input id="reg-pw" type="password" placeholder="Create a password" autocomplete="new-password">
+      <button class="pw-toggle" type="button" onclick="togglePw('reg-pw', this)" aria-label="Show password" title="Show password"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg></button>
+    </div>
+    <ul class="password-checklist" id="reg-pw-checklist"><li id="pw-length">At least 8 characters</li><li id="pw-number">Includes a number</li><li id="pw-symbol">Includes a symbol</li></ul>
+  </div>
+
+  <button class="btn btn-primary" id="register-btn" onclick="doRegister()">
+    <span id="register-btn-text">Create account</span>
+  </button>
+
+  <div class="auth-foot">Already have an account? <a class="btn-link" href="/login.html">Log in</a></div>
+</div>
+<div id="toast-host"></div>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+function togglePw(id, btn) {
+  const el = document.getElementById(id);
+  if (el.type === 'password') { el.type = 'text'; btn.textContent = 'Hide'; }
+  else { el.type = 'password'; btn.textContent = 'Show'; }
+}
+
+const RESERVED = ['campusconnect','admin','administrator','support','official'];
+let unameTimer, emailTimer;
+
+document.getElementById('reg-username').addEventListener('input', (e) => {
+  clearTimeout(unameTimer);
+  const v = e.target.value.trim();
+  const hint = document.getElementById('reg-username-hint');
+  const valid = /^[a-zA-Z0-9_]{3,20}$/.test(v);
+  if (!v) { hint.textContent = '3–20 characters: letters, numbers, underscores.'; hint.className = 'field-hint'; return; }
+  if (!valid) { hint.textContent = 'Only letters, numbers and underscores, 3–20 characters.'; hint.className = 'field-hint err-text'; return; }
+  if (RESERVED.includes(v.toLowerCase())) { hint.textContent = 'That username is reserved.'; hint.className = 'field-hint err-text'; return; }
+  hint.textContent = 'Checking availability…';
+  hint.className = 'field-hint';
+  unameTimer = setTimeout(async () => {
+    const { ok, data } = await apiFetch('/api/users/check-username?username=' + encodeURIComponent(v));
+    if (ok && data.available) { hint.textContent = '@' + v + ' is available.'; hint.className = 'field-hint ok-text'; }
+    else { hint.textContent = '@' + v + ' is already taken.'; hint.className = 'field-hint err-text'; }
+  }, 400);
+});
+
+document.getElementById('reg-email').addEventListener('input', (e) => {
+  clearTimeout(emailTimer);
+  const v = e.target.value.trim();
+  const hint = document.getElementById('reg-email-hint');
+  if (!v || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { hint.textContent = ''; return; }
+  hint.textContent = 'Checking availability…';
+  hint.className = 'field-hint';
+  emailTimer = setTimeout(async () => {
+    const { ok, data } = await apiFetch('/api/users/check-email?email=' + encodeURIComponent(v));
+    if (ok && data.available) { hint.textContent = 'Available.'; hint.className = 'field-hint ok-text'; }
+    else { hint.textContent = 'An account with this email already exists.'; hint.className = 'field-hint err-text'; }
+  }, 400);
+});
+
+document.getElementById('reg-pw').addEventListener('input', (e) => {
+  const v=e.target.value;
+  document.getElementById('pw-length').classList.toggle('valid',v.length>=8);
+  document.getElementById('pw-number').classList.toggle('valid',/[0-9]/.test(v));
+  document.getElementById('pw-symbol').classList.toggle('valid',/[^A-Za-z0-9]/.test(v));
+});
+
+async function doRegister() {
+  const errBox = document.getElementById('register-error');
+  errBox.classList.add('hidden');
+
+  const payload = {
+    username: document.getElementById('reg-username').value.trim(),
+    fullName: document.getElementById('reg-fullname').value.trim(),
+    email: document.getElementById('reg-email').value.trim(),
+    university: document.getElementById('reg-university').value.trim(),
+    password: document.getElementById('reg-pw').value,
+  };
+
+  if (!payload.username || !payload.fullName || !payload.email || !payload.university || !payload.password) {
+    errBox.textContent = 'Fill in every field before creating your account.';
+    errBox.classList.remove('hidden');
+    return;
+  }
+
+  const btn = document.getElementById('register-btn');
+  const txt = document.getElementById('register-btn-text');
+  btn.disabled = true;
+  txt.innerHTML = '<span class="spinner"></span>';
+
+  const { ok, offline, data } = await apiFetch('/api/users/register', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+
+  btn.disabled = false;
+  txt.textContent = 'Create account';
+
+  if (ok) {
+    toast('Account created — you can log in now');
+    setTimeout(() => window.location.href = '/index.html', 700);
+    return;
+  }
+  if (offline) {
+    errBox.textContent = "Can't reach the database right now — check your MySQL connection and try again.";
+  } else if (data?.fieldErrors) {
+    errBox.textContent = Object.values(data.fieldErrors)[0];
+  } else {
+    errBox.textContent = data?.message || 'Something went wrong. Try again.';
+  }
+  errBox.classList.remove('hidden');
+}
+</script>
+</body>
+</html>

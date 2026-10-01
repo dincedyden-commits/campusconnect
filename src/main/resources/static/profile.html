@@ -1,0 +1,92 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Profile — CampusConnect</title><link rel="stylesheet" href="/css/styles.css"><style>
+.profile-photo-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}.tabs{display:flex;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:4}.tab{flex:1;text-align:center;padding:14px;cursor:pointer;font-weight:700;color:var(--ink-faint)}.tab.active{color:var(--primary);border-bottom:2px solid var(--primary)}.camera-modal{position:fixed;inset:0;background:rgba(8,10,20,.82);z-index:80;display:none;align-items:center;justify-content:center;padding:18px}.camera-modal.show{display:flex}.camera-box{width:min(520px,100%);background:#fff;border-radius:20px;padding:14px}.camera-box video{width:100%;border-radius:14px;background:#111;aspect-ratio:4/3;object-fit:cover}.camera-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
+</style></head><body data-page="profile"><div id="app"><main style="flex:1;padding-bottom:84px"><div class="page-back"><button class="btn btn-ghost btn-auto" onclick="goBack()">← Back</button></div><div id="profile-header"><div class="profile-cover"></div><div class="profile-head"><div class="avatar lg" id="profile-avatar">·</div><div class="profile-photo-actions" id="own-photo-actions"><button class="btn btn-ghost btn-auto" onclick="openProfileCamera()">Take photo</button><label class="btn btn-ghost btn-auto">Choose photo<input id="profile-photo" type="file" accept="image/*" hidden></label></div><div class="profile-namewrap"><div class="profile-fullname" id="profile-fullname">Loading…</div><span class="id-chip" id="profile-username">@…</span></div><div class="profile-bio" id="profile-bio"></div><div class="profile-meta-row" id="profile-university"></div><section class="profile-settings-card" id="profile-info-card"><div class="section-heading"><strong>Profile information</strong><span>Account details</span></div><div class="profile-info-grid" id="profile-info-grid"></div></section><div class="profile-stats"><div class="stat-block"><span class="stat-num mono" id="stat-posts">0</span><span class="stat-label">Posts</span></div><div class="stat-block"><span class="stat-num mono" id="stat-followers">0</span><span class="stat-label">Followers</span></div><div class="stat-block"><span class="stat-num mono" id="stat-following">0</span><span class="stat-label">Following</span></div></div><div id="own-profile-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><a class="btn btn-ghost btn-auto" href="/communities.html">Communities</a><a class="btn btn-ghost btn-auto" href="/customer-service.html">Customer service</a><button class="btn btn-primary btn-auto" onclick="openProfileEditor()">⚙ Edit profile</button><button class="btn btn-ghost btn-auto" onclick="logout()">Log out</button></div></div><div class="tabs"><div class="tab active" id="posts-tab" onclick="switchProfileTab('posts')">Posts</div><div class="tab" id="media-tab" onclick="switchProfileTab('media')">Media</div><div class="tab" id="saved-tab" onclick="switchProfileTab('saved')">Saved</div></div></div><div id="profile-status-card" class="profile-settings-card" hidden><div class="section-heading"><strong>Status</strong><span>Visible from chats</span></div><div id="profile-status-content"></div></div><div id="profile-posts"></div></main><nav class="bottom-nav" aria-label="Primary navigation">
+  <a class="nav-item" data-nav="home" href="/index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg><span>Home</span></a>
+  <a class="nav-item" data-nav="search" href="/search.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.2-4.2"/></svg><span>Search</span></a>
+  <button class="nav-item nav-post" data-nav="post" onclick="location.href='/index.html?compose=1'" aria-label="Create post"><span class="post-plus"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span><span>Post</span></button>
+  <button class="nav-item nav-ai" data-nav="ai" onclick="if(typeof openGemini==='function'){openGemini()}else{location.href='/chats.html?ai=1'}" aria-label="Open Campus AI"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7L12 3Z"/><path d="m19 16 .7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16Z"/></svg><span>Campus AI</span></button>
+  <a class="nav-item" data-nav="profile" href="/profile.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.5-4.4 3.2-7 8-7s7.5 2.6 8 7"/><path d="M19 3.8v3.4M17.3 5.5h3.4"/></svg><span>Profile</span></a>
+</nav><div id="toast-host"></div></div>
+
+<div class="modal-overlay profile-edit-modal" id="profile-edit-modal">
+  <div class="modal-sheet">
+    <div class="modal-head"><h3>Edit profile</h3><button onclick="closeProfileEditor()" aria-label="Close">✕</button></div>
+    <form class="profile-edit-form" onsubmit="saveProfileForm(event)">
+      <label>Full name<input id="edit-fullName" maxlength="100" required></label>
+      <label>Username<input id="edit-username" maxlength="40" autocapitalize="none"></label>
+      <label>Email<input id="edit-email" type="email" maxlength="160"></label>
+      <label>Bio<textarea id="edit-bio" maxlength="500"></textarea></label>
+      <label>Phone<input id="edit-phone" maxlength="30"></label>
+      <label>Course<input id="edit-course" maxlength="120"></label>
+      <label>Year of study<input id="edit-year" maxlength="30"></label>
+      <label>University<input id="edit-university" maxlength="160"></label><label style="display:flex;align-items:center;gap:9px"><input id="edit-showPresence" type="checkbox" style="width:18px;height:18px"> Show my online / last seen status to other users</label>
+      <div class="modal-actions"><button type="button" class="btn btn-ghost btn-auto" onclick="closeProfileEditor()">Cancel</button><button type="submit" class="btn btn-primary btn-auto">Update profile</button></div>
+    </form>
+  </div>
+</div>
+<div id="profile-action-menu" class="profile-action-menu" hidden></div>
+<div class="camera-modal" id="camera-modal"><div class="camera-box"><video id="profile-camera-preview" autoplay playsinline></video><div class="camera-actions"><button class="btn btn-ghost btn-auto" onclick="closeProfileCamera()">Cancel</button><button class="btn btn-primary btn-auto" onclick="captureProfilePhoto()">Use photo</button></div></div></div>
+<script src="/js/app.js"></script><script>
+let profileCameraStream=null;
+async function loadProfile(){const me=await requireLogin();if(!me)return;const requested=new URLSearchParams(location.search).get('userId');const targetId=requested?Number(requested):CURRENT_USER_ID;const r=await apiFetch('/api/users/'+targetId);const u=r.ok?r.data:me;const own=Number(targetId)===Number(CURRENT_USER_ID);CURRENT_USER=u;document.getElementById('profile-fullname').textContent=u.fullName||u.username;document.getElementById('profile-username').textContent='@'+u.username;const cover=document.querySelector('.profile-cover');if(u.profilePictureUrl){cover.style.backgroundImage=`linear-gradient(rgba(0,0,0,.18),rgba(0,0,0,.32)),url(\"${u.profilePictureUrl}\")`;cover.style.backgroundSize='cover';cover.style.backgroundPosition='center';}const av=document.getElementById('profile-avatar');if(u.profilePictureUrl){av.textContent='';av.style.backgroundImage=`url("${u.profilePictureUrl}")`;av.style.backgroundSize='cover';av.style.backgroundPosition='center'}else{av.style.backgroundImage='';av.textContent=(u.username||'?')[0].toUpperCase()}document.getElementById('profile-bio').textContent=u.bio||'No bio yet.';document.getElementById('profile-university').textContent=[u.university,u.course,u.yearOfStudy].filter(Boolean).join(' · ');fillProfileInfo(u);document.getElementById('own-photo-actions').style.display=own?'flex':'none';document.getElementById('own-profile-actions').style.display=own?'flex':'none';if(!own){let a=document.getElementById('visitor-profile-actions');if(!a){a=document.createElement('div');a.id='visitor-profile-actions';a.style='display:flex;gap:8px;flex-wrap:wrap;margin-top:12px';document.querySelector('.profile-namewrap')?.appendChild(a)}const fs=await apiFetch('/api/follows/status/'+u.id);const following=!!fs.data?.following;a.innerHTML=`<button class="btn btn-primary btn-auto" onclick="apiFollowFromProfile(${u.id},this)">${following?'Following':'Follow'}</button><button class="btn btn-ghost btn-auto" onclick="showProfileActions(event,${u.id},'${escapeHtml(u.username)}',${following})">More</button>`;}else document.getElementById('visitor-profile-actions')?.remove();document.getElementById('saved-tab').style.display=own?'block':'none';const [f,g]=await Promise.all([apiFetch('/api/follows/followers/'+u.id),apiFetch('/api/follows/following/'+u.id)]);document.getElementById('stat-followers').textContent=f.data?.count||0;document.getElementById('stat-following').textContent=g.data?.count||0;const fromChat=new URLSearchParams(location.search).get('fromChat')==='1';
+ const statusCard=document.getElementById('profile-status-card');
+ if(fromChat&&!own){
+   const st=await apiFetch('/api/statuses/user/'+u.id+'?scope=chat');
+   if(st.ok&&st.data){const x=Array.isArray(st.data)?st.data[0]:st.data;if(x){statusCard.hidden=false;document.getElementById('profile-status-content').innerHTML=`<button class="conversation-btn" onclick="viewProfileStatus(${x.id})"><div class="conv-avatar">${x.profilePictureUrl?`<img src="${escapeHtml(x.profilePictureUrl)}">`:escapeHtml((u.username||'?')[0].toUpperCase())}</div><div class="conv-body"><b>@${escapeHtml(u.username)}</b><div class="conv-preview">${escapeHtml(x.caption||'View status')}</div></div></button>`}}
+ }else statusCard.hidden=true;
+ return u}
+async function viewProfileStatus(id){const r=await apiFetch('/api/statuses');const x=r.data?.find(v=>Number(v.id)===Number(id));if(!x)return;const w=window.open('','_blank','width=480,height=720');if(!w)return;w.document.write(`<body style="font-family:Arial;background:#111;color:#fff;text-align:center;padding:24px">${x.mediaUrl?`<img src="${escapeHtml(x.mediaUrl)}" style="max-width:100%;max-height:75vh;border-radius:16px">`:''}<p>${escapeHtml(x.caption||'')}</p></body>`);w.document.close()}
+async function loadMyPosts(){const c=document.getElementById('profile-posts');c.innerHTML=skeletonPosts(2);const targetId=Number(new URLSearchParams(location.search).get('userId')||CURRENT_USER_ID);const r=await apiFetch('/api/posts/user/'+targetId);if(!r.ok){c.innerHTML=notConnectedStateHTML();return}document.getElementById('stat-posts').textContent=r.data.length;c.innerHTML=r.data.length?r.data.map(postCardHTML).join(''):emptyStateHTML({icon:ICONS.posts,title:'No posts yet',body:'Whatever you share will show up here.'});enableFeedVideoAutoplay(c)}
+async function loadSaved(){const ids=new Set(JSON.parse(localStorage.getItem('cc_saved_posts')||'[]').map(Number));const c=document.getElementById('profile-posts');const r=await apiFetch('/api/posts');if(!r.ok){c.innerHTML=notConnectedStateHTML();return}const saved=r.data.filter(p=>ids.has(Number(p.id)));c.innerHTML=saved.length?saved.map(postCardHTML).join(''):emptyStateHTML({icon:ICONS.posts,title:'No saved posts',body:'Tap Save on a post to keep it here.'});enableFeedVideoAutoplay(c)}
+async function switchProfileTab(tab){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.getElementById(tab+'-tab').classList.add('active');if(tab==='saved')await loadSaved();else if(tab==='media'){const c=document.getElementById('profile-posts');const targetId=Number(new URLSearchParams(location.search).get('userId')||CURRENT_USER_ID);const r=await apiFetch('/api/posts/user/'+targetId);if(!r.ok){c.innerHTML=notConnectedStateHTML();return}const media=r.data.filter(p=>p.imageUrl||p.videoUrl);c.innerHTML=media.length?media.map(postCardHTML).join(''):emptyStateHTML({icon:ICONS.posts,title:'No media yet',body:'Photos and videos shared by this account will appear here.'});enableFeedVideoAutoplay(c)}else await loadMyPosts()}
+function fillProfileInfo(u){
+ const fields=[
+  ['Full name',u.fullName||u.name],['Username',u.username?('@'+u.username):'—'],['Email',u.email],
+  ['Phone',u.phone||u.phoneNumber],['University',u.university],['Course',u.course],
+  ['Year of study',u.yearOfStudy||u.year],['Joined',u.createdAt?new Date(u.createdAt).toLocaleDateString():'—'],
+  ['Bio',u.bio||'No bio yet.']
+ ].filter(([,v])=>v!==undefined&&v!==null&&String(v).trim()!=='');
+ document.getElementById('profile-info-grid').innerHTML=fields.map(([k,v])=>`<div class="profile-info-item"><small>${escapeHtml(k)}</small><b>${escapeHtml(String(v))}</b></div>`).join('');
+}
+function openProfileEditor(){
+ const u=CURRENT_USER;if(!u)return;
+ [['edit-fullName','fullName'],['edit-username','username'],['edit-email','email'],['edit-bio','bio'],['edit-phone','phone'],['edit-course','course'],['edit-year','yearOfStudy'],['edit-university','university']].forEach(([id,key])=>{const e=document.getElementById(id);if(e)e.value=u[key]??''});document.getElementById('edit-showPresence').checked=u.showPresence!==false;
+ document.getElementById('profile-edit-modal').classList.add('show');
+}
+function closeProfileEditor(){document.getElementById('profile-edit-modal').classList.remove('show')}
+async function saveProfileForm(ev){
+ ev.preventDefault();const body={};
+ [['edit-fullName','fullName'],['edit-username','username'],['edit-email','email'],['edit-bio','bio'],['edit-phone','phone'],['edit-course','course'],['edit-year','yearOfStudy'],['edit-university','university']].forEach(([id,key])=>{const e=document.getElementById(id);if(e)body[key]=e.value.trim()});body.showPresence=document.getElementById('edit-showPresence').checked;
+ const r=await apiFetch('/api/profile',{method:'PUT',body:JSON.stringify(body)});
+ if(r.ok){toast('Profile updated');closeProfileEditor();await loadCurrentUser();await loadProfile()}else toast(r.data?.message||'Could not update profile',true);
+}
+function showProfileActions(event,targetId,targetName,following){
+ const menu=document.getElementById('profile-action-menu');if(!menu)return;
+ menu.innerHTML=`<button onclick="profileAction('unfollow',${targetId})">${following?'Unfollow':'Follow'}</button>
+ <button onclick="profileAction('mute',${targetId})">Mute notifications</button>
+ <button onclick="profileAction('pin',${targetId})">Pin to top</button>
+ <button onclick="profileAction('block',${targetId})">Block</button>`;
+ menu.hidden=false;menu.style.left=Math.max(10,Math.min(window.innerWidth-205,event.clientX-190))+'px';menu.style.top=Math.min(window.innerHeight-220,event.clientY+8)+'px';
+ setTimeout(()=>document.addEventListener('click',hideProfileActions,{once:true}),20);
+}
+function hideProfileActions(){const m=document.getElementById('profile-action-menu');if(m)m.hidden=true}
+async function profileAction(type,id){
+ hideProfileActions();
+ const endpoint=type==='unfollow'?`/api/follows/${id}`:`/api/profile-actions/${type}/${id}`;
+ const r=await apiFetch(endpoint,{method:type==='unfollow'?'DELETE':'POST'});
+ if(r.ok||r.status===404){localStorage.setItem('cc_'+type+'_'+id,'1');toast(type==='mute'?'Notifications muted':type==='pin'?'Pinned to top':type==='block'?'User blocked':'Updated');if(type==='unfollow')loadProfile()}
+ else toast(r.data?.message||'Could not update profile action',true);
+}
+async function apiFollowFromProfile(id,btn){
+ const following=btn.textContent.trim()==='Following';
+ const r=await apiFetch('/api/follows/'+id,{method:following?'DELETE':'POST'});
+ if(r.ok){btn.textContent=following?'Follow':'Following';toast(following?'Unfollowed':'Following');}
+ else toast(r.data?.message||'Could not update follow',true);
+}
+async function uploadProfilePhoto(file){if(!file)return;if(file.size>10*1024*1024)return toast('Profile photos must be 10MB or smaller',true);const f=new FormData();f.append('file',file);const up=await apiFetch('/api/upload',{method:'POST',body:f});if(!up.ok)return toast(up.data?.message||'Upload failed',true);const r=await apiFetch('/api/profile',{method:'PUT',body:JSON.stringify({profilePictureUrl:up.data.url})});if(r.ok){toast('Profile photo updated');await loadCurrentUser();loadProfile()}else toast(r.data?.message||'Could not update photo',true)}
+document.getElementById('profile-photo').addEventListener('change',e=>uploadProfilePhoto(e.target.files?.[0]));
+async function openProfileCamera(){if(!navigator.mediaDevices?.getUserMedia)return document.getElementById('profile-photo').click();try{profileCameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});document.getElementById('profile-camera-preview').srcObject=profileCameraStream;document.getElementById('camera-modal').classList.add('show')}catch(e){toast('Camera permission was denied or the camera is unavailable. Choose a photo instead.',true);document.getElementById('profile-photo').click()}}
+function closeProfileCamera(){profileCameraStream?.getTracks().forEach(t=>t.stop());profileCameraStream=null;document.getElementById('camera-modal').classList.remove('show')}
+async function captureProfilePhoto(){const v=document.getElementById('profile-camera-preview');if(!v.videoWidth)return toast('Camera is still starting',true);const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);c.toBlob(async b=>{closeProfileCamera();await uploadProfilePhoto(new File([b],'profile-camera.jpg',{type:'image/jpeg'}))},'image/jpeg',.9)}
+loadProfile().then(loadMyPosts);
+</script></body></html>

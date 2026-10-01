@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>CampusConnect AI</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body data-page="ai">
+    <div id="app">
+        <main class="gemini-page">
+            <div class="gemini-shell">
+                <div class="gemini-top"><button class="btn btn-ghost btn-auto" onclick="goBack('/index.html')">←</button>
+                    <div class="gemini-brand">Campus<span>Connect</span> AI</div><button class="btn btn-ghost btn-auto" onclick="newGeminiChat()">New chat</button></div>
+                <div class="gemini-chat">
+                    <div id="gemini-history" class="gemini-history"></div>
+                    <div id="gemini-welcome" class="gemini-welcome">
+                        <div class="gemini-welcome-icon">✦</div>
+                        <h1>How can I help?</h1>
+                        <p>Ask about campus life, studying, writing, ideas, opportunities or anything you need help with.</p>
+                    </div>
+                    <div class="gemini-compose-wrap">
+                        <div id="gemini-preview" class="gemini-preview"></div>
+                        <div class="gemini-compose-box">
+                            <input type="file" id="gemini-camera" accept="image/*" capture="environment" hidden>
+                            <input type="file" id="gemini-image" accept="image/jpeg,image/png,image/webp" hidden>
+                            <input type="file" id="gemini-zip" accept=".zip,application/zip,application/x-zip-compressed" hidden>
+                            <button type="button" class="gemini-tool-btn" onclick="document.getElementById('gemini-camera').click()" aria-label="Take picture">📷</button>
+                            <button type="button" class="gemini-tool-btn" onclick="document.getElementById('gemini-image').click()" aria-label="Upload image">🖼️</button>
+                            <button type="button" class="gemini-tool-btn" onclick="document.getElementById('gemini-zip').click()" aria-label="Upload ZIP file">📎</button>
+                            <textarea id="gemini-input" rows="1" maxlength="1200" placeholder="Message CampusConnect AI"></textarea>
+                            <button id="gemini-send" type="button" class="gemini-send" aria-label="Send">↑</button>
+                        </div>
+                        <div class="small-note">Images and ZIP files only. Maximum 50MB.</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <div id="toast-host"></div>
+    </div>
+    <script src="/js/app.js"></script>
+    <script>
+        let geminiAttachment = null;
+
+        const cameraInput = document.getElementById('gemini-camera');
+        const imageInput = document.getElementById('gemini-image');
+        const zipInput = document.getElementById('gemini-zip');
+        const preview = document.getElementById('gemini-preview');
+        const input = document.getElementById('gemini-input');
+        const sendButton = document.getElementById('gemini-send');
+
+
+        // ===============================
+        // FILE INPUTS
+        // ===============================
+
+        [cameraInput, imageInput, zipInput].forEach(fileInput => {
+
+            fileInput.addEventListener('change', function() {
+
+                handleGeminiFile(this.files[0]);
+
+            });
+
+        });
+
+
+        // ===============================
+        // CHAT HISTORY
+        // ===============================
+
+        function historyData() {
+
+            try {
+
+                return JSON.parse(
+                    localStorage.getItem('cc_gemini_history') || '[]'
+                );
+
+            } catch {
+
+                return [];
+
+            }
+
+        }
+
+
+        function renderHistory() {
+
+            const h = historyData();
+
+            const box = document.getElementById('gemini-history');
+            const welcome = document.getElementById('gemini-welcome');
+
+            welcome.style.display = h.length ? 'none' : '';
+
+            box.innerHTML = h.slice(-30).map(x => `
+
+        <div class="gemini-msg user">
+
+            <div class="gemini-msg-bubble">
+
+                ${escapeHtml(x.q || '')}
+
+            </div>
+
+        </div>
+
+        <div class="gemini-msg assistant">
+
+            <div class="gemini-msg-bubble">
+
+                ${escapeHtml(x.a || '')}
+
+            </div>
+
+        </div>
+
+    `).join('');
+
+        }
+
+
+        // ===============================
+        // NEW CHAT
+        // ===============================
+
+        function newGeminiChat() {
+
+            localStorage.removeItem('cc_gemini_history');
+
+            renderHistory();
+
+            input.focus();
+
+        }
+
+
+        // ===============================
+        // FILE HANDLING
+        // ===============================
+
+        function handleGeminiFile(file) {
+
+            if (!file) return;
+
+
+            // Maximum 50 MB
+
+            if (file.size > 50 * 1024 * 1024) {
+
+                toast('File must be 50MB or smaller.', true);
+
+                return;
+
+            }
+
+
+            const isImage =
+                file.type === 'image/jpeg' ||
+                file.type === 'image/png' ||
+                file.type === 'image/webp';
+
+
+            const isZip =
+                file.name.toLowerCase().endsWith('.zip');
+
+
+            if (!isImage && !isZip) {
+
+                toast(
+                    'Only JPG, PNG, WEBP images and ZIP files are allowed.',
+                    true
+                );
+
+                return;
+
+            }
+
+
+            if (geminiAttachment && geminiAttachment.previewUrl) {
+
+                URL.revokeObjectURL(
+                    geminiAttachment.previewUrl
+                );
+
+            }
+
+
+            geminiAttachment = {
+
+                file: file,
+
+                previewUrl: null
+
+            };
+
+
+            showGeminiPreview(file);
+
+        }
+
+
+        // ===============================
+        // SHOW ATTACHMENT
+        // ===============================
+
+        function showGeminiPreview(file) {
+
+            preview.replaceChildren();
+
+
+            const container =
+                document.createElement('div');
+
+            container.className =
+                'gemini-attachment-preview';
+
+
+            if (file.type.startsWith('image/')) {
+
+                const image =
+                    document.createElement('img');
+
+                const objectUrl =
+                    URL.createObjectURL(file);
+
+                image.src = objectUrl;
+
+                image.className =
+                    'gemini-image-preview';
+
+                geminiAttachment.previewUrl =
+                    objectUrl;
+
+                container.appendChild(image);
+
+            } else {
+
+                const zipIcon =
+                    document.createElement('div');
+
+                zipIcon.className =
+                    'gemini-zip-preview';
+
+                zipIcon.textContent = '📦';
+
+                container.appendChild(zipIcon);
+
+            }
+
+
+            const info =
+                document.createElement('div');
+
+            info.className =
+                'gemini-attachment-info';
+
+
+            const name =
+                document.createElement('strong');
+
+            name.textContent =
+                file.name;
+
+
+            const size =
+                document.createElement('span');
+
+            size.textContent =
+                formatFileSize(file.size);
+
+
+            info.append(name, size);
+
+
+            const remove =
+                document.createElement('button');
+
+            remove.type = 'button';
+
+            remove.className =
+                'gemini-remove-attachment';
+
+            remove.textContent = '×';
+
+            remove.setAttribute(
+                'aria-label',
+                'Remove attachment'
+            );
+
+            remove.addEventListener(
+                'click',
+                removeGeminiAttachment
+            );
+
+
+            container.append(info, remove);
+
+            preview.appendChild(container);
+
+        }
+
+
+        // ===============================
+        // REMOVE ATTACHMENT
+        // ===============================
+
+        function removeGeminiAttachment() {
+
+            if (geminiAttachment && geminiAttachment.previewUrl) {
+
+                URL.revokeObjectURL(
+                    geminiAttachment.previewUrl
+                );
+
+            }
+
+
+            geminiAttachment = null;
+
+
+            cameraInput.value = '';
+
+            imageInput.value = '';
+
+            zipInput.value = '';
+
+
+            preview.replaceChildren();
+
+        }
+
+
+        // ===============================
+        // FILE SIZE
+        // ===============================
+
+        function formatFileSize(bytes) {
+
+            if (bytes < 1024) {
+
+                return bytes + ' B';
+
+            }
+
+
+            if (bytes < 1024 * 1024) {
+
+                return (
+                    bytes / 1024
+                ).toFixed(1) + ' KB';
+
+            }
+
+
+            return (
+                bytes / (1024 * 1024)
+            ).toFixed(1) + ' MB';
+
+        }
+
+
+        // ===============================
+        // SEND MESSAGE
+        // ===============================
+
+        async function sendStandaloneGemini() {
+
+            const prompt =
+                input.value.trim();
+
+            const file =
+                geminiAttachment && geminiAttachment.file;
+
+
+            if (!prompt && !file) {
+
+                toast(
+                    'Please enter a message or attach a file.',
+                    true
+                );
+
+                return;
+
+            }
+
+
+            // Prevent double sending
+
+            sendButton.disabled = true;
+
+
+            // Get existing conversation
+
+            const history =
+                historyData();
+
+
+            // Add temporary message
+
+            history.push({
+
+                q: prompt ||
+                    'Attachment: ' + file.name,
+
+                a: 'Thinking…',
+
+                createdAt: new Date().toISOString()
+
+            });
+
+
+            localStorage.setItem(
+
+                'cc_gemini_history',
+
+                JSON.stringify(
+                    history.slice(-100)
+                )
+
+            );
+
+
+            renderHistory();
+
+
+            try {
+
+                let attachmentUrl = '';
+
+                let attachmentType = '';
+
+
+                // ===============================
+                // UPLOAD FILE FIRST
+                // ===============================
+
+                if (file) {
+
+                    const formData =
+                        new FormData();
+
+                    formData.append(
+                        'file',
+                        file
+                    );
+
+
+                    console.log(
+                        'Uploading file:',
+                        file.name
+                    );
+
+
+                    const upload =
+                        await apiFetch(
+                            '/api/upload', {
+                                method: 'POST',
+                                body: formData
+                            }
+                        );
+
+
+                    if (!upload.ok) {
+
+                        throw new Error(
+                            (upload.data && upload.data.message) ||
+                            'Could not upload file.'
+                        );
+
+                    }
+
+
+                    attachmentUrl =
+                        (upload.data && upload.data.url) || '';
+
+                    attachmentType =
+                        (upload.data && upload.data.type) ||
+                        file.type;
+
+
+                    console.log(
+                        'File uploaded:',
+                        attachmentUrl
+                    );
+
+                }
+
+
+                // ===============================
+                // SEND TO GEMINI
+                // ===============================
+
+                console.log(
+                    'Sending prompt:',
+                    prompt
+                );
+
+
+                const result =
+                    await apiFetch(
+                        '/api/ai/ask', {
+
+                            method: 'POST',
+
+                            body: JSON.stringify({
+
+                                prompt: prompt ||
+                                    'Please analyze this attachment.',
+
+                                attachmentUrl: attachmentUrl,
+
+                                attachmentType: attachmentType
+
+                            })
+
+                        }
+                    );
+
+
+                console.log(
+                    'Gemini result:',
+                    result
+                );
+
+
+                // ===============================
+                // SAVE RESPONSE
+                // ===============================
+
+                const latest =
+                    historyData();
+
+
+                if (latest.length) {
+
+                    latest[
+                        latest.length - 1
+                    ].a = result.ok
+
+                        ?
+                        (
+                            (result.data && result.data.response) ||
+                            (result.data && result.data.message) ||
+                            'No response received.'
+                        )
+
+                    : (
+                        (result.data && result.data.message) ||
+                        'CampusConnect AI request failed.'
+                    );
+
+                }
+
+
+                localStorage.setItem(
+
+                    'cc_gemini_history',
+
+                    JSON.stringify(
+                        latest.slice(-100)
+                    )
+
+                );
+
+
+                // Remove attachment after successful send
+
+                if (result.ok && file) {
+
+                    removeGeminiAttachment();
+
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    'CampusConnect AI error:',
+                    error
+                );
+
+
+                const latest =
+                    historyData();
+
+
+                if (latest.length) {
+
+                    latest[
+                            latest.length - 1
+                        ].a =
+                        error.message ||
+                        'Unable to connect to CampusConnect AI.';
+
+                }
+
+
+                localStorage.setItem(
+
+                    'cc_gemini_history',
+
+                    JSON.stringify(
+                        latest.slice(-100)
+                    )
+
+                );
+
+            }
+
+
+            // ===============================
+            // RESET COMPOSER
+            // ===============================
+
+            input.value = '';
+
+            input.style.height = 'auto';
+
+            sendButton.disabled = false;
+
+
+            renderHistory();
+
+            input.focus();
+
+        }
+
+
+        // ===============================
+        // SEND BUTTON
+        // ===============================
+
+        sendButton.addEventListener(
+            'click',
+            sendStandaloneGemini
+        );
+
+
+        // ===============================
+        // ENTER TO SEND
+        // ===============================
+
+        input.addEventListener(
+            'keydown',
+            event => {
+
+                if (
+                    event.key === 'Enter' &&
+                    !event.shiftKey
+                ) {
+
+                    event.preventDefault();
+
+                    sendStandaloneGemini();
+
+                }
+
+            }
+        );
+
+
+        // ===============================
+        // AUTO RESIZE
+        // ===============================
+
+        input.addEventListener(
+            'input',
+            () => {
+
+                input.style.height = 'auto';
+
+                input.style.height =
+                    Math.min(
+                        input.scrollHeight,
+                        150
+                    ) + 'px';
+
+            }
+        );
+
+
+        // ===============================
+        // INITIALIZE
+        // ===============================
+
+        renderHistory();
+    </script>
+</body>
+
+</html>

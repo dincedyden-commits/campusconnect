@@ -1,0 +1,8 @@
+package com.campusconnect.campusconnect.controller;
+import com.campusconnect.campusconnect.entity.User; import com.campusconnect.campusconnect.repository.UserRepository; import org.springframework.web.bind.annotation.*; import jakarta.servlet.http.HttpSession; import java.util.*;
+@RestController @RequestMapping("/api/profile")
+public class ProfileController {
+ final UserRepository users; public ProfileController(UserRepository u){users=u;}
+ private Long me(HttpSession s){Object x=s.getAttribute("userId");if(x==null)throw new IllegalArgumentException("Log in first");return ((Number)x).longValue();}
+ @PutMapping public Map<String,Object> update(@RequestBody Map<String,String> b,HttpSession s){User u=users.findById(me(s)).orElseThrow();if(b.containsKey("fullName"))u.setFullName(b.get("fullName").trim());if(b.containsKey("bio"))u.setBio(b.get("bio"));if(b.containsKey("university"))u.setUniversity(b.get("university"));if(b.containsKey("course"))u.setCourse(b.get("course"));if(b.containsKey("yearOfStudy"))u.setYearOfStudy(b.get("yearOfStudy"));if(b.containsKey("profilePictureUrl"))u.setProfilePictureUrl(b.get("profilePictureUrl"));users.save(u);return Map.of("id",u.getId(),"username",u.getUsername(),"fullName",u.getFullName(),"email",u.getEmail(),"university",u.getUniversity()==null?"":u.getUniversity(),"bio",u.getBio()==null?"":u.getBio(),"course",u.getCourse()==null?"":u.getCourse(),"yearOfStudy",u.getYearOfStudy()==null?"":u.getYearOfStudy(),"profilePictureUrl",u.getProfilePictureUrl()==null?"":u.getProfilePictureUrl());}
+}

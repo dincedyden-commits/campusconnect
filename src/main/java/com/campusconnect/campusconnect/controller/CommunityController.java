@@ -1,0 +1,28 @@
+package com.campusconnect.campusconnect.controller;
+
+import com.campusconnect.campusconnect.entity.*;
+import com.campusconnect.campusconnect.repository.*;
+import com.campusconnect.campusconnect.service.UserService;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.web.bind.annotation.*;
+import java.util.*;
+
+@RestController @RequestMapping("/api/communities")
+public class CommunityController {
+ private final CommunityRepository communities; private final CommunityMemberRepository members; private final UserRepository users;
+ public CommunityController(CommunityRepository c,CommunityMemberRepository m,UserRepository u){communities=c;members=m;users=u;}
+ private Long me(HttpSession s){Object id=s.getAttribute("userId"); if(id==null)throw new IllegalStateException("Please log in"); return ((Number)id).longValue();}
+ private Community community(Long id){return communities.findById(id).orElseThrow(()->new IllegalArgumentException("Community not found"));}
+ private CommunityMember membership(Long cid,Long uid){return members.findByCommunityIdAndUserId(cid,uid).orElseThrow(()->new IllegalArgumentException("You are not a member"));}
+ private Map<String,Object> dto(Community c){Map<String,Object> m=new LinkedHashMap<>();m.put("id",c.getId());m.put("name",c.getName());m.put("type",c.getType());m.put("description",c.getDescription());m.put("profilePictureUrl",c.getProfilePictureUrl());m.put("ownerId",c.getOwner().getId());m.put("ownerUsername",c.getOwner().getUsername());m.put("createdAt",c.getCreatedAt());return m;}
+ @GetMapping public List<Map<String,Object>> list(HttpSession s){Long uid=me(s);return communities.findAllByOrderByCreatedAtDesc().stream().map(c->{Map<String,Object> out=dto(c);boolean canManage=c.getOwner().getId().equals(uid)||members.findByCommunityIdAndUserId(c.getId(),uid).map(m->m.getRole().equals("OWNER")||m.getRole().equals("ADMIN")).orElse(false);out.put("canManage",canManage);return out;}).toList();}
+ @PostMapping public Map<String,Object> create(@RequestBody Map<String,String> body,HttpSession s){User u=users.findById(me(s)).orElseThrow();String name=Optional.ofNullable(body.get("name")).orElse("").trim();String type=Optional.ofNullable(body.get("type")).orElse("GROUP").toUpperCase();if(name.isBlank()||name.length()>100)throw new IllegalArgumentException("Community name is required");
+ if(!(u.getRole().equalsIgnoreCase("ADMIN")||u.getRole().equalsIgnoreCase("OFFICIAL")) && UserService.containsReservedCampusConnectTerm(name))
+     throw new IllegalArgumentException("Reserved name: community names cannot contain Campus Connect or Campus Connect Official");if(!Set.of("GROUP","CHANNEL").contains(type))throw new IllegalArgumentException("Invalid community type");Community c=new Community();c.setName(name);c.setType(type);c.setDescription(body.get("description"));c.setProfilePictureUrl(body.get("profilePictureUrl"));c.setOwner(u);c=communities.save(c);CommunityMember cm=new CommunityMember();cm.setCommunity(c);cm.setUser(u);cm.setRole("OWNER");members.save(cm);return dto(c);}
+ @PostMapping("/{id}/join") public void join(@PathVariable Long id,HttpSession s){Long uid=me(s);if(members.existsByCommunityIdAndUserId(id,uid))return;CommunityMember cm=new CommunityMember();cm.setCommunity(community(id));cm.setUser(users.findById(uid).orElseThrow());cm.setRole("MEMBER");members.save(cm);}
+ @GetMapping("/{id}/members") public List<Map<String,Object>> memberList(@PathVariable Long id,HttpSession s){membership(id,me(s));return members.findByCommunityIdOrderByJoinedAtAsc(id).stream().map(cm->{Map<String,Object> m=new LinkedHashMap<>();m.put("userId",cm.getUser().getId());m.put("username",cm.getUser().getUsername());m.put("fullName",cm.getUser().getFullName());m.put("role",cm.getRole());m.put("profilePictureUrl",cm.getUser().getProfilePictureUrl());return m;}).toList();}
+ @PostMapping("/{id}/members/{userId}") public void add(@PathVariable Long id,@PathVariable Long userId,HttpSession s){Long uid=me(s);CommunityMember actor=membership(id,uid);if(!(actor.getRole().equals("OWNER")||actor.getRole().equals("ADMIN")))throw new IllegalArgumentException("Only admins can add members");if(!members.existsByCommunityIdAndUserId(id,userId)){CommunityMember cm=new CommunityMember();cm.setCommunity(community(id));cm.setUser(users.findById(userId).orElseThrow());cm.setRole("MEMBER");members.save(cm);}}
+ @DeleteMapping("/{id}/members/{userId}") public void remove(@PathVariable Long id,@PathVariable Long userId,HttpSession s){Long uid=me(s);CommunityMember actor=membership(id,uid);if(!(actor.getRole().equals("OWNER")||actor.getRole().equals("ADMIN")))throw new IllegalArgumentException("Only admins can remove members");CommunityMember target=membership(id,userId);if(target.getRole().equals("OWNER"))throw new IllegalArgumentException("The owner cannot be removed");members.delete(target);}
+ @PostMapping("/{id}/admins/{userId}") public void makeAdmin(@PathVariable Long id,@PathVariable Long userId,HttpSession s){CommunityMember actor=membership(id,me(s));if(!actor.getRole().equals("OWNER"))throw new IllegalArgumentException("Only the owner can manage admins");CommunityMember target=membership(id,userId);if(!target.getRole().equals("OWNER")){target.setRole("ADMIN");members.save(target);}}
+ @DeleteMapping("/{id}/admins/{userId}") public void removeAdmin(@PathVariable Long id,@PathVariable Long userId,HttpSession s){CommunityMember actor=membership(id,me(s));if(!actor.getRole().equals("OWNER"))throw new IllegalArgumentException("Only the owner can manage admins");CommunityMember target=membership(id,userId);if(target.getRole().equals("ADMIN")){target.setRole("MEMBER");members.save(target);}}
+}

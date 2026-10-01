@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search — CampusConnect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/styles.css">
+</head>
+<body data-page="search">
+<div id="app">
+
+  <div class="top-header">
+    <div class="logo-lockup"><div class="logo-mark"></div><div class="logo-word">Campus<span>Connect</span></div></div>
+  </div>
+
+  <div class="cc-page-banner"><h1>Search</h1><p>Find trending campus news, accounts, posts and opportunities.</p></div>
+  <div style="flex:1;display:flex;flex-direction:column;">
+    <div class="search-bar-wrap">
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--ink-faint)" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input id="search-input" placeholder="Search posts by keyword…" autocomplete="off">
+      </div>
+      <div style="font-size:12px;color:var(--ink-faint);margin-top:8px;">Searches post content today — usernames, universities and events plug into this same box once those endpoints exist.</div>
+    </div>
+    <section class="search-discovery" id="search-discovery">
+  <div class="trending-card"><h3>Trending on campus</h3><div id="trending-list"><div class="small-note">Loading trending topics…</div></div></div>
+</section>
+<div id="search-results"></div>
+  </div>
+
+  <nav class="bottom-nav" aria-label="Primary navigation">
+  <a class="nav-item" data-nav="home" href="/index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg><span>Home</span></a>
+  <a class="nav-item" data-nav="search" href="/search.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.2-4.2"/></svg><span>Search</span></a>
+  <button class="nav-item nav-post" data-nav="post" onclick="location.href='/index.html?compose=1'" aria-label="Create post"><span class="post-plus"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span><span>Post</span></button>
+  <button class="nav-item nav-ai" data-nav="ai" onclick="if(typeof openGemini==='function'){openGemini()}else{location.href='/chats.html?ai=1'}" aria-label="Open Campus AI"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7L12 3Z"/><path d="m19 16 .7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16Z"/></svg><span>Campus AI</span></button>
+  <a class="nav-item" data-nav="profile" href="/profile.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.5-4.4 3.2-7 8-7s7.5 2.6 8 7"/><path d="M19 3.8v3.4M17.3 5.5h3.4"/></svg><span>Profile</span></a>
+</nav>
+
+  <div id="toast-host"></div>
+</div>
+
+<script src="/js/app.js"></script><script>
+const resultsEl=document.getElementById('search-results'),inputEl=document.getElementById('search-input');let debounceTimer;
+async function loadDiscovery(){
+ const box=document.getElementById('trending-list');if(!box)return;
+ const r=await apiFetch('/api/trending');
+ if(r.ok&&Array.isArray(r.data)&&r.data.length){box.innerHTML=r.data.slice(0,8).map((x,i)=>`<div class="trend-row"><span><b>#${i+1}</b> ${escapeHtml(x.title||x.topic||x.name||'Campus trend')}</span><small>${escapeHtml(String(x.count??''))}</small></div>`).join('');return}
+ const u=await apiFetch('/api/users/discoverable');
+ if(u.ok&&u.data?.length){box.innerHTML=u.data.slice(0,5).map((x,i)=>`<div class="trend-row"><span><b>@${escapeHtml(x.username)}</b><br><small>${escapeHtml(x.fullName||x.university||'CampusConnect account')}</small></span><button class="btn btn-ghost btn-auto" onclick="location.href='/profile.html?userId=${x.id}'">View</button></div>`).join('');return}
+ box.innerHTML='<div class="small-note">Trending accounts and campus topics will appear here as activity grows.</div>';
+}
+function showPrompt(){resultsEl.innerHTML=emptyStateHTML({icon:ICONS.search,title:'Search your campus',body:'Find real students and posts.'})}
+async function runSearch(q){
+ resultsEl.innerHTML=skeletonPosts(2);
+ const [posts,users]=await Promise.all([apiFetch('/api/posts/search?q='+encodeURIComponent(q)),apiFetch('/api/users/search?q='+encodeURIComponent(q))]);
+ let html='';
+ if(users.ok){
+   const visible=users.data.filter(u=>Number(u.id)!==Number(CURRENT_USER_ID));
+   const states=await Promise.all(visible.map(u=>apiFetch('/api/follows/status/'+u.id)));
+   html+=visible.map((u,i)=>{
+     const following=!!states[i].data?.following;
+     return `<div class="post-card user-result-card">
+       <div class="post-head"><div class="avatar sm">${escapeHtml((u.username||'?')[0].toUpperCase())}</div><div class="post-head-meta"><b>@${escapeHtml(u.username)}</b><div>${escapeHtml(u.fullName||'')}</div><small>${escapeHtml(u.university||'')}</small></div></div>
+       <div class="post-actions"><button class="follow-inline ${following?'following':''}" data-following="${following}" data-username="${escapeHtml(u.username)}" onclick="toggleFollowUser(${u.id},this)">${iconSvg(following?'minus':'plus')}<span>${following?'Unfollow':'Follow'}</span></button><button class="btn btn-ghost btn-auto" onclick="messageUser(${u.id},'${escapeHtml(u.username)}')">Message</button></div>
+     </div>`;
+   }).join('');
+ }
+ if(posts.ok)html+=posts.data.map(postCardHTML).join('');
+ resultsEl.innerHTML=html||emptyStateHTML({icon:ICONS.search,title:'No results',body:'Try another keyword.'});
+}
+
+async function messageUser(id,u){const text=prompt('@'+u+' — message');if(!text?.trim())return;const r=await apiFetch('/api/messages/to/'+id,{method:'POST',body:JSON.stringify({content:text.trim()})});if(r.ok){toast('Message sent');location.href='/chats.html?userId='+encodeURIComponent(id)+'&username='+encodeURIComponent(u)}else toast(r.data?.message||'Could not send',true)}
+loadDiscovery();inputEl.addEventListener('input',()=>{clearTimeout(debounceTimer);const q=inputEl.value.trim();if(!q){showPrompt();return}debounceTimer=setTimeout(()=>runSearch(q),300)});showPrompt();
+</script></body>
+</html>
