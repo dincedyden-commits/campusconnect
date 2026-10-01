@@ -1,0 +1,1094 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <title>Chats · CampusConnect</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+         :root {
+            --wa: #00a884;
+            --wa-dark: #008f72;
+            --wa-soft: #e7f8f3;
+            --wa-wall: #efeae2
+        }
+        
+        .chat-page {
+            min-height: 100dvh;
+            background: #f7f9fb;
+            padding-bottom: 0
+        }
+        
+        .chat-shell {
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            max-width: 1180px;
+            margin: auto;
+            background: var(--surface);
+            box-shadow: 0 0 60px rgba(20, 20, 43, .08)
+        }
+        
+        .chat-toolbar {
+            height: 68px;
+            flex: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 18px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--line)
+        }
+        
+        .chat-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+        
+        .chat-brand-mark {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--wa), #38c8a6);
+            color: #fff;
+            display: grid;
+            place-items: center;
+            box-shadow: 0 8px 20px rgba(0, 168, 132, .2)
+        }
+        
+        .chat-brand-mark svg {
+            width: 21px;
+            height: 21px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8
+        }
+        
+        .chat-brand strong {
+            font-size: 18px
+        }
+        
+        .chat-brand small {
+            display: block;
+            color: var(--ink-soft);
+            font-size: 11px;
+            margin-top: 1px
+        }
+        
+        .chat-top-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 7px;
+            align-items: center
+        }
+        
+        .wa-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: var(--bg);
+            border: 1px solid var(--line)
+        }
+        
+        .wa-icon svg {
+            width: 19px;
+            height: 19px
+        }
+        
+        .wa-icon:hover {
+            background: var(--wa-soft);
+            color: var(--wa-dark)
+        }
+        
+        .chat-workspace {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            flex: 1;
+            min-height: 0
+        }
+        
+        .chat-sidebar {
+            border-right: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            background: var(--surface)
+        }
+        
+        .chat-sidebar-head {
+            padding: 16px 16px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between
+        }
+        
+        .chat-sidebar-head h1 {
+            font-size: 23px
+        }
+        
+        .chat-new {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--wa);
+            color: #fff;
+            display: grid;
+            place-items: center;
+            font-size: 24px;
+            box-shadow: 0 8px 18px rgba(0, 168, 132, .2)
+        }
+        
+        .chat-search {
+            margin: 0 12px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg);
+            border: 1px solid transparent;
+            border-radius: 12px;
+            padding: 0 12px
+        }
+        
+        .chat-search:focus-within {
+            border-color: var(--wa)
+        }
+        
+        .chat-search svg {
+            width: 18px;
+            color: var(--ink-faint);
+            flex: none
+        }
+        
+        .chat-search input {
+            width: 100%;
+            border: 0;
+            outline: 0;
+            background: transparent;
+            padding: 11px 4px;
+            color: var(--ink)
+        }
+        
+        .chat-filters {
+            display: flex;
+            gap: 6px;
+            padding: 0 12px 10px;
+            overflow: auto
+        }
+        
+        .chat-filter {
+            border: 1px solid var(--line);
+            background: var(--surface);
+            padding: 7px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+            color: var(--ink-soft)
+        }
+        
+        .chat-filter.active {
+            background: var(--wa-soft);
+            border-color: #bfeee3;
+            color: var(--wa-dark)
+        }
+        
+        .chat-list {
+            overflow: auto;
+            flex: 1;
+            padding: 0 7px 82px
+        }
+        
+        .conversation-btn {
+            width: 100%;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            text-align: left;
+            border: 0;
+            background: transparent;
+            padding: 12px 10px;
+            border-radius: 12px;
+            cursor: pointer
+        }
+        
+        .conversation-btn:hover,
+        .conversation-btn.active {
+            background: var(--wa-soft)
+        }
+        
+        .conv-avatar,
+        .chat-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #cfd8dc, #eef2f4);
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+            color: #50606a;
+            flex: none;
+            overflow: hidden;
+            position: relative
+        }
+        
+        .conv-avatar img,
+        .chat-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover
+        }
+        
+        .online-dot {
+            position: absolute;
+            right: 0;
+            bottom: 1px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #25d366;
+            border: 2px solid var(--surface)
+        }
+        
+        .conv-body {
+            min-width: 0;
+            flex: 1
+        }
+        
+        .conv-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px
+        }
+        
+        .conv-name {
+            font-weight: 750;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+        
+        .conv-time {
+            font-size: 11px;
+            color: var(--ink-faint);
+            white-space: nowrap
+        }
+        
+        .conv-preview {
+            color: var(--ink-soft);
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 3px
+        }
+        
+        .conv-badge {
+            display: inline-flex;
+            min-width: 19px;
+            height: 19px;
+            padding: 0 5px;
+            border-radius: 999px;
+            background: var(--wa);
+            color: #fff;
+            font-size: 10px;
+            align-items: center;
+            justify-content: center;
+            margin-left: 5px
+        }
+        
+        .chat-main {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            background: var(--wa-wall);
+            position: relative
+        }
+        
+        .chat-main:before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: .23;
+            pointer-events: none;
+            background-image: radial-gradient(#9c968d .7px, transparent .7px);
+            background-size: 18px 18px
+        }
+        
+        .chat-head,
+        .chat-messages,
+        .chat-compose {
+            position: relative;
+            z-index: 1
+        }
+        
+        .chat-head {
+            min-height: 68px;
+            padding: 10px 15px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+        
+        .back-btn {
+            display: none
+        }
+        
+        .chat-head-info {
+            min-width: 0
+        }
+        
+        .chat-head-info b {
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+        
+        .chat-head-info small {
+            color: var(--ink-soft);
+            font-size: 12px
+        }
+        
+        .chat-tools {
+            margin-left: auto;
+            display: flex;
+            gap: 4px
+        }
+        
+        .chat-tools .wa-icon {
+            background: transparent;
+            border: 0
+        }
+        
+        .chat-tools .btn {
+            font-size: 12px;
+            padding: 8px 10px
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow: auto;
+            padding: 18px clamp(12px, 6vw, 70px)
+        }
+        
+        .date-divider {
+            text-align: center;
+            margin: 4px auto 14px;
+            background: rgba(255, 255, 255, .86);
+            width: max-content;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            color: #667781;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .05)
+        }
+        
+        .bubble-wrap {
+            display: flex;
+            margin: 3px 0
+        }
+        
+        .bubble-wrap.mine {
+            justify-content: flex-end
+        }
+        
+        .bubble {
+            max-width: min(72%, 620px);
+            padding: 8px 10px 6px;
+            border-radius: 9px;
+            background: #fff;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .08);
+            position: relative
+        }
+        
+        .bubble.mine {
+            background: #d9fdd3
+        }
+        
+        .bubble-content {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            line-height: 1.42
+        }
+        
+        .bubble-author {
+            font-size: 11px;
+            font-weight: 800;
+            color: #667781;
+            margin-bottom: 3px
+        }
+        
+        .bubble-meta {
+            font-size: 10px;
+            color: #667781;
+            text-align: right;
+            margin-top: 4px
+        }
+        
+        .bubble-actions {
+            display: none;
+            gap: 3px;
+            position: absolute;
+            right: 5px;
+            top: -34px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            padding: 3px;
+            border-radius: 9px;
+            box-shadow: var(--shadow-card)
+        }
+        
+        .bubble:hover .bubble-actions {
+            display: flex
+        }
+        
+        .bubble-action {
+            font-size: 11px;
+            padding: 5px 7px;
+            border-radius: 7px
+        }
+        
+        .bubble-action:hover {
+            background: var(--bg)
+        }
+        
+        .voice-note {
+            width: 230px;
+            max-width: 100%;
+            height: 36px
+        }
+        
+        .attachment-preview {
+            display: block;
+            max-width: 260px;
+            border-radius: 10px;
+            margin-bottom: 5px
+        }
+        
+        .product-card-mini {
+            border: 1px solid rgba(0, 0, 0, .08);
+            border-radius: 10px;
+            padding: 8px;
+            margin-top: 5px;
+            background: rgba(255, 255, 255, .45)
+        }
+        
+        .chat-compose {
+            display: flex;
+            gap: 6px;
+            padding: 9px 12px;
+            background: #f0f2f5;
+            align-items: center
+        }
+        
+        .compose-round {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            color: #54656f
+        }
+        
+        .compose-round:hover {
+            background: #e2e7ea
+        }
+        
+        .chat-compose input {
+            flex: 1;
+            min-width: 0;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 22px;
+            padding: 12px 15px;
+            outline: 0
+        }
+        
+        .chat-compose input:focus {
+            border-color: var(--wa)
+        }
+        
+        .send-round {
+            width: 43px;
+            height: 43px;
+            border-radius: 50%;
+            background: var(--wa);
+            color: #fff;
+            display: grid;
+            place-items: center
+        }
+        
+        .send-round svg {
+            width: 20px
+        }
+        
+        .recording {
+            background: #d32f2f!important;
+            color: #fff!important
+        }
+        
+        .chat-empty {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px
+        }
+        
+        .chat-empty-card {
+            max-width: 390px;
+            background: rgba(255, 255, 255, .88);
+            border: 1px solid rgba(0, 0, 0, .05);
+            border-radius: 22px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, .08)
+        }
+        
+        .chat-empty-icon {
+            width: 64px;
+            height: 64px;
+            margin: auto auto 14px;
+            border-radius: 20px;
+            background: var(--wa-soft);
+            color: var(--wa);
+            display: grid;
+            place-items: center
+        }
+        
+        .chat-empty-icon svg {
+            width: 31px
+        }
+        
+        .chat-empty-card h2 {
+            font-size: 20px;
+            margin-bottom: 7px
+        }
+        
+        .chat-empty-card p {
+            color: #667781;
+            font-size: 13px;
+            line-height: 1.55
+        }
+        
+        .gemini-chat-card {
+            margin: 0 12px 10px;
+            padding: 11px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #f4f0ff, #eef8ff);
+            border: 1px solid #e2dcff;
+            display: flex;
+            gap: 10px;
+            align-items: center
+        }
+        
+        .gemini-spark {
+            width: 34px;
+            height: 34px;
+            border-radius: 11px;
+            background: linear-gradient(135deg, #7c5cff, #28a9ff);
+            color: #fff;
+            display: grid;
+            place-items: center;
+            box-shadow: 0 7px 16px rgba(92, 76, 255, .2)
+        }
+        
+        .gemini-spark svg {
+            width: 18px;
+            fill: currentColor
+        }
+        
+        .gemini-chat-card strong {
+            font-size: 12px
+        }
+        
+        .gemini-chat-card small {
+            display: block;
+            color: #66627a;
+            font-size: 10px;
+            margin-top: 2px
+        }
+        
+        .gemini-chat-card button {
+            margin-left: auto;
+            border: 0;
+            background: #fff;
+            border: 1px solid #ddd6ff;
+            border-radius: 999px;
+            padding: 7px 10px;
+            font-size: 11px;
+            font-weight: 800;
+            color: #5d49d6
+        }
+        
+        @media(max-width:760px) {
+            .chat-shell {
+                height: 100dvh
+            }
+            .chat-workspace {
+                display: block
+            }
+            .chat-sidebar {
+                height: 100%
+            }
+            .chat-main {
+                display: none;
+                height: 100%
+            }
+            .chat-workspace.open .chat-sidebar {
+                display: none
+            }
+            .chat-workspace.open .chat-main {
+                display: flex
+            }
+            .back-btn {
+                display: grid
+            }
+            .chat-tools .text-tool {
+                display: none
+            }
+            .bubble {
+                max-width: 86%
+            }
+            .bubble-actions {
+                display: flex;
+                position: static;
+                margin-top: 4px;
+                background: transparent;
+                border: 0;
+                padding: 0;
+                box-shadow: none
+            }
+            .chat-list {
+                padding-bottom: 80px
+            }
+        }
+        
+        html[data-theme="dark"] .chat-page,
+        html[data-theme="dark"] .chat-shell {
+            background: var(--bg)
+        }
+        
+        html[data-theme="dark"] .chat-main {
+            background: #0f1218
+        }
+        
+        .chat-main:before {
+            opacity: .09
+        }
+        
+        .chat-compose {
+            background: #e9edf0
+        }
+        
+        html[data-theme="dark"] .chat-compose {
+            background: #1b2027
+        }
+        
+        html[data-theme="dark"] .chat-search {
+            background: #1b2027
+        }
+        
+        .chat-empty-card {
+            color: var(--ink)
+        }
+    </style>
+</head>
+
+<body data-page="chats" class="chat-page">
+    <div class="chat-shell">
+        <header class="chat-toolbar">
+            <div class="chat-toolbar-main">
+                <button class="wa-icon" onclick="goBack('/index.html')" aria-label="Back" title="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
+                <div class="chat-brand">
+                    <div><strong>Chats</strong></div>
+                </div>
+                <div class="chat-top-actions"><a class="cc-top-profile" href="/profile.html" title="Profile settings" aria-label="Profile settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c.5-4.4 3.2-7 8-7s7.5 2.6 8 7"/></svg></a></div>
+            </div>
+        </header>
+        <nav class="chat-wa-tabs" role="tablist" aria-label="Chat sections">
+            <button class="chat-wa-tab active" role="tab" aria-selected="true" onclick="showChatSection('chats',this)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a8.3 8.3 0 0 1-8.5 8.4 8.6 8.6 0 0 1-4.1-1L3 21l1.8-4a8.3 8.3 0 0 1-1.7-4.7A8.4 8.4 0 0 1 11.5 4 8.4 8.4 0 0 1 20 11.5Z"/><path d="M8 12h.01M12 12h.01M16 12h.01"/></svg><span>Chats</span></button>
+            <button class="chat-wa-tab" role="tab" aria-selected="false" onclick="showChatSection('updates',this)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Updates</span></button>
+            <button class="chat-wa-tab" role="tab" aria-selected="false" onclick="showChatSection('gemini',this)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c1 5.8 3.7 8.5 9.5 9.5-5.8 1-8.5 3.7-9.5 9.5-1-5.8-3.7-8.5-9.5-9.5 5.8-1 8.5-3.7 9.5-9.5Z"/></svg><span>Gemini</span></button>
+            <button class="chat-wa-tab" role="tab" aria-selected="false" onclick="showChatSection('calls',this)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 3.5 9 3l2 4.5-2.2 1.7a15 15 0 0 0 6 6l1.7-2.2 4.5 2-.5 2.4a3 3 0 0 1-3.3 2.4A17.5 17.5 0 0 1 4.2 6.8a3 3 0 0 1 2.4-3.3Z"/></svg><span>Calls</span></button>
+        </nav>
+        <section id="chat-updates-panel" class="chat-sidebar" style="display:none;max-width:760px;width:100%;margin:0 auto;border-right:0">
+            <div class="chat-sidebar-head">
+                <h1>Updates</h1><button class="chat-new" onclick="location.href='/index.html'">+</button></div>
+            <div id="chat-status-list" class="chat-list"></div>
+        </section>
+        <section id="chat-gemini-page" class="chat-gemini-page" hidden>
+            <header class="chat-gemini-heading"><span class="gemini-spark"><svg viewBox="0 0 32 32"><path d="M16 2c1.2 7.1 4.9 11.8 14 14-9.1 2.2-12.8 5.9-14 14-1.2-8.1-4.9-11.8-14-14C11.1 13.8 14.8 9.1 16 2Z"/></svg></span>
+                <div>
+                    <h1>Gemini</h1>
+                    <p>Your campus AI assistant</p>
+                </div>
+            </header>
+            <section class="chat-gemini-card">
+                <div id="gemini-answer" class="cc-ai-answer">Ask Gemini about study topics, campus life, events, writing or ideas.</div>
+                <div id="gemini-history" class="chat-gemini-history"></div>
+                <div id="gemini-attachment" class="chat-gemini-attachment" aria-live="polite"></div>
+                <div class="chat-gemini-suggestions"><button onclick="useGeminiPrompt('Help me plan my study week')">Plan my study week</button><button onclick="useGeminiPrompt('Explain this topic simply: ')">Explain a topic</button><button onclick="useGeminiPrompt('Suggest a campus event')">Campus event ideas</button></div>
+                <div class="chat-gemini-compose"><input id="gemini-input" maxlength="1200" placeholder="Ask Gemini…"><button class="btn btn-primary btn-auto" onclick="sendGemini()">Ask Gemini</button></div>
+            </section>
+        </section>
+        <div class="chat-workspace" id="layout">
+            <aside class="chat-sidebar">
+                <div class="chat-sidebar-head">
+                    <h1>Messages</h1><button class="chat-new" onclick="openNewChat()" title="New chat">+</button></div>
+
+                <div class="chat-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="chat-search" placeholder="Search chats or students" autocomplete="off"></div>
+                <div class="chat-filters"><button class="chat-filter active" onclick="setChatFilter('all',this)">All</button><button class="chat-filter" onclick="location.href='/communities.html?type=GROUP'">Groups</button><button class="chat-filter" onclick="location.href='/communities.html?type=CHANNEL'">Channels</button></div>
+                <div id="chat-list" class="chat-list"></div>
+            </aside>
+            <section class="chat-main">
+                <div class="chat-head"><button class="wa-icon back-btn" onclick="closeChat()" title="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button><button id="chat-profile-link" class="chat-profile-link"
+                        type="button" onclick="openChatProfile()"><div class="chat-avatar" id="chat-avatar">?</div><div class="chat-head-info"><b id="chat-title">Your conversations</b><small id="chat-sub" class="chat-profile-bio">Select a student to start chatting</small></div></button>
+                    <div class="chat-tools" id="chat-tools"></div>
+                </div>
+                <aside id="chat-profile-card" class="chat-profile-card" hidden></aside>
+                <div class="chat-messages" id="chat-messages">
+                    <div class="chat-empty">
+                        <div class="chat-empty-card">
+                            <div class="chat-empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 11.5a8.3 8.3 0 01-8.5 8.4 8.6 8.6 0 01-4.1-1L3 21l1.8-4a8.3 8.3 0 01-1.7-4.7A8.4 8.4 0 0111.5 4 8.4 8.4 0 0120 11.5z"/></svg></div>
+                            <h2>Your messages stay here</h2>
+                            <p>Choose a real CampusConnect user to chat. Conversations are loaded from your account — no demo chats are inserted.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-compose"><button class="compose-round" onclick="document.getElementById('attachment-input').click()" title="Attach file"><svg viewBox="0 0 24 24" width="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5l-8.5 8.5a6 6 0 01-8.5-8.5l8.7-8.7a4 4 0 015.7 5.7l-8.8 8.8a2 2 0 01-2.8-2.8l8-8"/></svg></button>
+                    <input id="attachment-input" type="file" hidden accept="image/*,video/*"><button class="compose-round" onclick="toggleEmojiPicker()" title="Emoji">☺</button><input id="message-input" maxlength="4000" placeholder="Type a message"
+                        autocomplete="off"><button id="voice-btn" class="compose-round" onclick="toggleVoiceNote()" title="Voice note"><svg viewBox="0 0 24 24" width="19" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3M9 21h6"/></svg></button>
+                    <button id="view-once-toggle" class="compose-round view-once-toggle" type="button" onclick="toggleViewOnce()" aria-pressed="false" title="Send a view-once message">1</button><button class="send-round" onclick="sendMessage()" title="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+                </div>
+            </section>
+        </div>
+        <section id="call-history-panel" class="call-history-panel">
+            <h1 class="call-history-title">Calls</h1>
+            <div class="call-history-sub">Your CampusConnect call history. Tap a person to choose a voice or video call.</div>
+            <div id="chat-call-history-list"></div>
+        </section>
+        <!-- The shared primary navigation is installed by app.js; chat sections stay in the page tabs above. -->
+        <div id="emoji-picker" style="display:none;position:fixed;right:18px;bottom:78px;z-index:100;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px;box-shadow:0 18px 50px rgba(0,0,0,.16);font-size:22px;max-width:280px;line-height:1.8"></div>
+        <div id="new-chat-modal" class="community-modal" style="position:fixed;inset:0;background:rgba(8,10,20,.65);display:none;align-items:center;justify-content:center;padding:16px;z-index:90">
+            <div style="background:var(--surface);width:min(500px,100%);border-radius:22px;padding:18px">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                    <h3>Start a new chat</h3><button class="wa-icon" onclick="closeNewChat()">×</button></div>
+                <div class="chat-search" style="margin:14px 0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="new-chat-search" placeholder="Search username" autocomplete="off"></div>
+                <div id="new-chat-results"></div>
+            </div>
+        </div>
+        <div id="view-once-viewer" class="view-once-viewer" onclick="if(event.target===this)closeViewOnce()" aria-hidden="true">
+            <div class="view-once-sheet"><button class="view-once-close" onclick="closeViewOnce()" aria-label="Close">×</button>
+                <div class="view-once-content"></div>
+            </div>
+        </div>
+        <div id="cc-call-overlay" class="cc-call-overlay" aria-hidden="true">
+            <div class="cc-call-top">CampusConnect Audio Call
+                <div class="cc-call-status"><span class="online-dot" style="border-color:transparent"></span>Connected · HD Audio</div>
+            </div>
+            <div>
+                <div id="reply-banner" class="reply-banner" hidden>
+                    <div><small id="reply-to-name">Replying to</small><span id="reply-to-text"></span></div><button type="button" onclick="cancelReply()" aria-label="Cancel reply">×</button></div>
+                <div id="cc-call-avatar" class="cc-call-avatar">?</div>
+                <div id="cc-call-name" class="cc-call-name">@student</div>
+                <div id="cc-call-handle" class="cc-call-handle">CampusConnect</div>
+                <div id="cc-call-timer" class="cc-call-timer">00:00</div>
+            </div>
+            <div class="cc-call-controls">
+                <button class="cc-call-control" id="cc-mute" onclick="toggleCallControl('mute',this)"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3M9 21h6"/></svg><span>Mute Mic</span></button>
+                <button class="cc-call-control" id="cc-speaker" onclick="toggleCallControl('speaker',this)"><svg viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6l-5 4H4Z"/><path d="M17 9.5a4 4 0 010 5M19.5 7a7.5 7.5 0 010 10"/></svg><span>Speaker</span></button>
+                <button class="cc-call-control" onclick="toggleCallKeypad()"><svg viewBox="0 0 24 24"><circle cx="7" cy="6" r="1"/><circle cx="12" cy="6" r="1"/><circle cx="17" cy="6" r="1"/><circle cx="7" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="17" cy="12" r="1"/><circle cx="7" cy="18" r="1"/><circle cx="12" cy="18" r="1"/><circle cx="17" cy="18" r="1"/></svg><span>Keypad</span></button>
+                <button class="cc-call-end" onclick="endCampusCall()" aria-label="End call"><svg viewBox="0 0 24 24"><path d="M5 7.5C8 5 16 5 19 7.5l-1.4 3.2c-.3.7-1.1 1-1.8.7l-2.1-.8a2 2 0 00-1.4 0l-1.1.4a2 2 0 01-1.4 0l-1.1-.4a2 2 0 00-1.4 0l-2.1.8c-.7.3-1.5 0-1.8-.7L5 7.5Z"/></svg></button>
+            </div>
+        </div>
+
+        <div id="call-choice-modal" class="call-choice-modal" aria-hidden="true">
+            <div class="call-choice-sheet">
+                <h3 id="call-choice-name">Call</h3>
+                <p>Choose how you want to call this person.</p>
+                <div class="call-choice-buttons"><button class="primary" onclick="startHistoryCall('voice')">☎ Voice call</button><button class="primary" onclick="startHistoryCall('video')">▣ Video call</button></div><button class="btn btn-ghost" style="width:100%;margin-top:9px" onclick="closeCallChoice()">Cancel</button></div>
+        </div>
+        <div id="toast-host"></div>
+    </div>
+    <script src="/js/app.js"></script>
+    <script>
+        let activeUser = null,
+            activeProduct = null,
+            chatFilter = 'all';
+
+        function roomFor(a, b) {
+            return 'dm-' + [Number(a), Number(b)].sort((x, y) => x - y).join('-')
+        }
+
+        function cacheKey(id) {
+            return 'cc_chat_' + [Number(CURRENT_USER_ID), Number(id)].sort((a, b) => a - b).join('_')
+        }
+
+        function cacheConversation(id, data) {
+            try {
+                localStorage.setItem(cacheKey(id), JSON.stringify(data));
+                localStorage.setItem('cc_last_chat', JSON.stringify({
+                    id: Number(id),
+                    username: activeUser?.username || ''
+                }))
+            } catch (e) {}
+        }
+
+        function cachedConversation(id) {
+            try {
+                return JSON.parse(localStorage.getItem(cacheKey(id)) || '[]')
+            } catch (e) {
+                return []
+            }
+        }
+        let ccCallTimerHandle = null,
+            ccCallSeconds = 0;
+
+        function openCall(mode = 'video') {
+            if (!activeUser) return;
+            if (mode === 'voice') {
+                startCampusCall();
+                return
+            }
+            location.href = '/calls.html?room=' + encodeURIComponent(roomFor(CURRENT_USER_ID, activeUser.id)) + '&title=' + encodeURIComponent('@' + activeUser.username) + '&mode=' + mode
+        }
+
+        function startCampusCall() {
+            const o = document.getElementById('cc-call-overlay');
+            if (!o) return;
+            const u = activeUser?.username || 'student';
+            document.getElementById('cc-call-name').textContent = '@' + u;
+            document.getElementById('cc-call-handle').textContent = 'CampusConnect student';
+            document.getElementById('cc-call-avatar').textContent = (u[0] || '?').toUpperCase();
+            o.classList.add('show');
+            o.setAttribute('aria-hidden', 'false');
+            ccCallSeconds = 0;
+            clearInterval(ccCallTimerHandle);
+            ccCallTimerHandle = setInterval(() => {
+                ccCallSeconds++;
+                const m = String(Math.floor(ccCallSeconds / 60)).padStart(2, '0'),
+                    s = String(ccCallSeconds % 60).padStart(2, '0');
+                document.getElementById('cc-call-timer').textContent = m + ':' + s
+            }, 1000)
+        }
+
+        function toggleCallControl(type, btn) {
+            btn.classList.toggle('active');
+            btn.style.background = btn.classList.contains('active') ? 'rgba(99,102,241,.35)' : 'rgba(255,255,255,.11)';
+            toast(type === 'mute' ? (btn.classList.contains('active') ? 'Microphone muted' : 'Microphone on') : (btn.classList.contains('active') ? 'Speakerphone on' : 'Speakerphone off'))
+        }
+
+        function toggleCallKeypad() {
+            toast('Keypad ready')
+        }
+
+        function endCampusCall() {
+            clearInterval(ccCallTimerHandle);
+            const o = document.getElementById('cc-call-overlay');
+            if (o) {
+                o.classList.remove('show');
+                o.setAttribute('aria-hidden', 'true')
+            }
+            toast('Call ended')
+        }
+
+        function openLocation() {
+            googleMapsCurrentLocation()
+        }
+
+        function setChatFilter(filter, button) {
+            chatFilter = filter;
+            document.querySelectorAll('.chat-filter').forEach(x => x.classList.remove('active'));
+            button?.classList.add('active');
+            loadChats()
+        }
+
+        function presenceText(x) {
+            return x.showPresence === false ? '' : (x.online ? 'online' : (x.lastSeen ? 'last seen ' + timeAgo(x.lastSeen) : 'offline'))
+        }
+
+        function conversationHTML(x) {
+            const initial = (x.username || '?')[0].toUpperCase();
+            const name = x.fullName || x.name || x.username || 'Student';
+            const avatar = x.profilePictureUrl ? '<img src="' + escapeHtml(x.profilePictureUrl) + '" alt="">' : escapeHtml(initial);
+            const dot = x.showPresence !== false && x.online ? '<span class="online-dot"></span>' : '';
+            return `<button class="conversation-btn" onclick="selectChat(${x.userId},'${escapeHtml(x.username)}',${x.productId||'null'})"><div class="conv-avatar">${avatar}${dot}</div><div class="conv-body"><div class="conv-row"><span class="conv-name">${escapeHtml(name)} <small class="conv-handle">@${escapeHtml(x.username)}</small></span><span class="conv-time">${timeAgo(x.createdAt)}</span></div><div class="conv-preview">${escapeHtml(x.lastMessage||'Start a conversation')}</div><small>${escapeHtml(presenceText(x))}</small></div></button>`
+        }
+        async function renderTools() {
+            if (!activeUser) {
+                document.getElementById('chat-tools').innerHTML = '';
+                return
+            }
+            const st = await apiFetch('/api/blocks/' + activeUser.id);
+            const blocked = st.ok && st.data?.blocked;
+            document.getElementById('chat-tools').innerHTML = `<button class="wa-icon text-tool" onclick="openCall('video')" title="Video call"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 10l5-3v10l-5-3v3a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h8a2 2 0 012 2v3z"/></svg></button><button class="wa-icon text-tool" onclick="openCall('voice')" title="Normal call"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6.5 3.5l3 1.5-1.8 4-2.1-.7a13.4 13.4 0 006.1 6.1l-.7-2.1 4-1.8 1.5 3c.4.8.1 1.7-.6 2.2l-1.6 1c-1.1.7-2.5.7-3.6.1A17.1 17.1 0 014 7.4c-.6-1.1-.6-2.5.1-3.6l1-1.6c.4-.7 1.4-1 2.2-.6z"/></svg></button><button class="wa-icon text-tool" onclick="openLocation()" title="Share location"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-6.2 7-12a7 7 0 10-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.3"/></svg></button><button class="wa-icon" onclick="toggleBlock()" title="${blocked?'Unblock':'Block'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></svg></button>`;
+            document.getElementById('message-input').disabled = blocked;
+            document.getElementById('voice-btn').disabled = blocked;
+            document.querySelector('.send-round').disabled = blocked;
+            document.getElementById('message-input').placeholder = blocked ? 'Messaging is blocked' : 'Type a message'
+        }
+        async function loadChats() {
+            await requireLogin();
+            const [r, officials] = await Promise.all([apiFetch('/api/messages/conversations'), apiFetch('/api/users/discoverable')]);
+            const list = document.getElementById('chat-list');
+            if (!r.ok) {
+                list.innerHTML = notConnectedStateHTML();
+                return
+            }
+            let data = r.data || [];
+            const q = document.getElementById('chat-search')?.value.trim().toLowerCase();
+            if (q) data = data.filter(x => (x.username || '').toLowerCase().includes(q) || (x.lastMessage || '').toLowerCase().includes(q));
+            let officialHtml = '';
+            list.innerHTML = officialHtml + (data.length ? data.map(conversationHTML).join('') : (!officialHtml ? emptyStateHTML({
+                icon: ICONS.chats,
+                title: 'No conversations yet',
+                body: 'Start a real conversation with a CampusConnect student.',
+                ctaLabel: 'Start a chat',
+                ctaOnclick: 'openNewChat()'
+            }) : ''));
+            try {
+                localStorage.setItem('cc_conversations', JSON.stringify(r.data || []))
+            } catch (e) {}
+        }
+        async function selectChat(id, username, productId = null) {
+            if (!document.getElementById('layout').classList.contains('open')) history.pushState({
+                ccChatConversation: true
+            }, '', location.href);
+            activeUser = {
+                id: Number(id),
+                username
+            };
+            activeProduct = productId;
+            document.getElementById('chat-gemini-page').hidden = true;
+            document.getElementById('chat-updates-panel').style.display = 'none';
+            document.getElementById('layout').style.display = 'grid';
+            document.getElementById('chat-profile-card').hidden = true;
+            document.getElementById('layout').classList.add('open');
+            document.getElementById('call-history-panel').classList.remove('show');
+            const u = await apiFetch('/api/users/' + id);
+            const profile = u.ok ? u.data : null;
+            const fullName = profile?.fullName || profile?.name || username || 'Student';
+            document.getElementById('chat-title').textContent = fullName;
+            document.getElementById('chat-sub').textContent = '@' + username;
+            const av = document.getElementById('chat-avatar');
+            av.innerHTML = profile?.profilePictureUrl ? '<img src="' + escapeHtml(profile.profilePictureUrl) + '" alt="">' : escapeHtml((username || '?')[0].toUpperCase());
+            document.getElementById('chat-profile-card').innerHTML = `<div class="chat-profile-cover"></div><div class="chat-profile-main"><div class="chat-profile-large-avatar">${profile?.profilePictureUrl?`<img src="${escapeHtml(profile.profilePictureUrl)}" alt="">`:escapeHtml((username||'?')[0].toUpperCase())}</div><strong>${escapeHtml(fullName)}</strong><span>@${escapeHtml(username)}</span><p>${escapeHtml(profile?.bio||'No profile bio provided yet.')}</p><div class="chat-profile-facts">${profile?.university?`<span>${escapeHtml(profile.university)}</span>`:''}${profile?.course?`<span>${escapeHtml(profile.course)}</span>`:''}${profile?.yearOfStudy?`<span>${escapeHtml(profile.yearOfStudy)}</span>`:''}</div><a class="btn btn-primary btn-auto" href="/profile.html?userId=${encodeURIComponent(id)}&fromChat=1">View full profile</a></div>`;
+ await renderTools();
+ const r=await apiFetch('/api/messages/with/'+id);const data=r.ok?r.data:cachedConversation(id);cacheConversation(id,data);renderMessages(data)
+}
+let currentMessages=[],replyTarget=null,viewOnceEnabled=false;
+function renderMessages(data){currentMessages=Array.isArray(data)?data:[];const box=document.getElementById('chat-messages');if(!currentMessages.length){box.innerHTML='<div class="chat-empty"><div class="chat-empty-card"><div class="chat-empty-icon">💬</div><h2>Start the conversation</h2><p>Send a message, photo, voice note or document. Your messages are saved through CampusConnect.</p></div></div>';return}box.innerHTML=currentMessages.map(m=>{const mine=Number(m.senderId)===Number(CURRENT_USER_ID),editable=mine&&withinEditWindow(m.createdAt)&&m.content,once=m.viewOnce&&!mine?(m.viewed?'<div class="view-once-expired">This view-once message has been opened</div>':`<button class="view-once-open" onclick="openViewOnce(${m.id})">◉ Open view-once message</button>`):messageContentHTML(m);return `<div class="bubble-wrap ${mine?'mine':''}" data-message-id="${m.id}"><div class="bubble ${mine?'mine':''}">${!mine?`<div class="bubble-author">@${escapeHtml(m.senderUsername)}</div>`:''}${once}${m.productId?`<div class="product-card-mini">${escapeHtml(m.productTitle||'Marketplace item')} · ${escapeHtml(m.productPrice||'')}</div>`:''}<div class="bubble-meta">${timeAgo(m.createdAt)} ${editable?'· editable':''}</div><div class="bubble-actions"><button class="bubble-action" onclick="replyToMessage(${m.id})">Reply</button><button class="bubble-action" onclick="copyMessage(${m.id})">Copy</button>${mine&&editable?`<button class="bubble-action" onclick="editMessage(${m.id})">Edit</button>`:''}${mine?`<button class="bubble-action" onclick="deleteMessage(${m.id},'me')">Delete</button>`:''}</div></div></div>`}).join('');box.scrollTop=box.scrollHeight}
+function replyToMessage(id){const m=currentMessages.find(x=>Number(x.id)===Number(id));if(!m)return;replyTarget={name:Number(m.senderId)===Number(CURRENT_USER_ID)?'You':'@'+m.senderUsername,text:String(m.content||'').slice(0,180)};document.getElementById('reply-to-name').textContent='Replying to '+replyTarget.name;document.getElementById('reply-to-text').textContent=replyTarget.text;document.getElementById('reply-banner').hidden=false;document.getElementById('message-input').focus()}
+function cancelReply(){replyTarget=null;document.getElementById('reply-banner').hidden=true}
+async function copyMessage(id){const m=currentMessages.find(x=>Number(x.id)===Number(id));if(!m)return;const raw=String(m.content||'');const shared=raw.replace(/^\[SHARED\]/,'');try{await navigator.clipboard.writeText(shared);toast('Copied text is marked as shared')}catch{return toast('Clipboard access is unavailable',true)}if(activeUser&&shared.trim()&&!shared.startsWith('[ATTACH]')&&!shared.startsWith('[VOICE]')){await sendRawMessage('[SHARED]'+shared)} }
+function toggleViewOnce(){viewOnceEnabled=!viewOnceEnabled;const button=document.getElementById('view-once-toggle');button.classList.toggle('active',viewOnceEnabled);button.setAttribute('aria-pressed',String(viewOnceEnabled));button.title=viewOnceEnabled?'View-once is on':'Send a view-once message'}
+async function openViewOnce(id){const r=await apiFetch('/api/messages/'+id+'/view',{method:'POST'});if(!r.ok)return toast(r.data?.message||'This message is unavailable',true);const viewer=document.getElementById('view-once-viewer');viewer.querySelector('.view-once-content').innerHTML=messageContentHTML(r.data);viewer.classList.add('show');const updated=await apiFetch('/api/messages/with/'+activeUser.id);if(updated.ok){cacheConversation(activeUser.id,updated.data);renderMessages(updated.data)}}
+function closeViewOnce(){const viewer=document.getElementById('view-once-viewer');viewer.classList.remove('show');viewer.querySelector('.view-once-content').textContent=''}
+let mediaRecorder=null,voiceChunks=[],recordingVoice=false;
+async function toggleVoiceNote(){if(recordingVoice){mediaRecorder?.stop();return}if(!navigator.mediaDevices?.getUserMedia)return toast('Voice recording is not supported here',true);try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});voiceChunks=[];mediaRecorder=new MediaRecorder(stream);recordingVoice=true;document.getElementById('voice-btn').classList.add('recording');mediaRecorder.ondataavailable=e=>{if(e.data.size)voiceChunks.push(e.data)};mediaRecorder.onstop=async()=>{recordingVoice=false;document.getElementById('voice-btn').classList.remove('recording');document.getElementById('voice-btn').setAttribute('aria-label','Record voice note');document.getElementById('voice-btn').title='Record voice note';stream.getTracks().forEach(t=>t.stop());if(!voiceChunks.length)return toast('No voice was recorded',true);const blob=new Blob(voiceChunks,{type:mediaRecorder.mimeType||'audio/webm'});const f=new FormData();f.append('file',blob,'voice-note.webm');const up=await apiFetch('/api/upload',{method:'POST',body:f});if(!up.ok)return toast(up.data?.message||'Voice upload failed',true);await sendRawMessage('[VOICE]'+up.data.url)};mediaRecorder.start();document.getElementById('voice-btn').setAttribute('aria-label','Stop recording');document.getElementById('voice-btn').title='Stop recording';toast('Recording… tap the microphone again to stop')}catch(e){toast('Microphone permission is required',true)}}
+function messageContentHTML(m){const c=String(m.content||'').replace(/^\[SHARED\]/,'');if(c.startsWith('[VOICE]'))return '<audio controls class="voice-note" src="'+escapeHtml(c.slice(7))+'"></audio>';if(c.startsWith('[ATTACH]')){const u=c.slice(8),safe=escapeHtml(u);return '<a href="'+safe+'" target="_blank" rel="noopener" class="attachment-link"><img class="attachment-preview" src="'+safe+'" onerror="this.style.display=\'none\'" alt="Attachment"><span>Open attachment</span></a>'}const reply=c.match(/^\[REPLY:([^\]]+)\] ([^\n]*)\n([\s\S]*)$/);if(reply)return `<div class="reply-quote"><b>${escapeHtml(reply[1])}</b><span>${escapeHtml(reply[2])}</span></div><div class="bubble-content">${escapeHtml(reply[3])}</div>`;return '<div class="bubble-content">'+escapeHtml(c)+'</div>'}
+async function sendRawMessage(text,extra={}){if(!activeUser)return toast('Choose a conversation first',true);const content=replyTarget?`[REPLY:${replyTarget.name}] ${replyTarget.text}\n${text}`:text;const payload={content,viewOnce:viewOnceEnabled,...extra};const r=await apiFetch('/api/messages/to/'+activeUser.id,{method:'POST',body:JSON.stringify(payload)});if(r.ok){cancelReply();if(viewOnceEnabled)toggleViewOnce();const data=await apiFetch('/api/messages/with/'+activeUser.id);if(data.ok){cacheConversation(activeUser.id,data.data);renderMessages(data.data)}loadChats()}else toast(r.data?.message||'Could not send message',true)}
+async function sendMessage(){const input=document.getElementById('message-input'),text=input.value.trim();if(!text)return;input.value='';await sendRawMessage(text,activeProduct?{productId:Number(activeProduct)}:{})}
+async function uploadAttachment(file){if(!activeUser||!file)return;if(!(file.type.startsWith('image/')||file.type.startsWith('video/')))return toast('Only images and videos can be attached',true);if(file.size>50*1024*1024)return toast('Attachment must be 50MB or smaller',true);const f=new FormData();f.append('file',file);const up=await apiFetch('/api/upload',{method:'POST',body:f});if(up.ok){await sendRawMessage('[ATTACH]'+up.data.url)}else toast(up.data?.message||'Upload failed',true)}
+async function editMessage(id){const el=document.querySelector(`[data-message-id="${id}"] .bubble-content`),next=prompt('Edit message',el?.textContent||'');if(next===null)return;const r=await apiFetch('/api/messages/'+id,{method:'PUT',body:JSON.stringify({content:next.trim()})});if(r.ok){const d=await apiFetch('/api/messages/with/'+activeUser.id);if(d.ok){cacheConversation(activeUser.id,d.data);renderMessages(d.data)}}else toast(r.data?.message||'Could not edit message',true)}
+async function deleteMessage(id,mode='me'){
+ const el=document.querySelector(`[data-message-id="${id}"]`);
+ el?.remove();
+ const r=await apiFetch('/api/messages/'+id,{method:'DELETE'});
+ if(r.ok){toast('Message deleted');await loadChats();}
+ else {toast(r.data?.message||'Could not delete message',true);if(activeUser){const d=await apiFetch('/api/messages/with/'+activeUser.id);if(d.ok)renderMessages(d.data);}}
+}
+async function toggleBlock(){if(!activeUser)return;const r=await apiFetch('/api/blocks/'+activeUser.id,{method:'POST'});if(r.ok){toast(r.data.blocked?'User blocked':'User unblocked');await renderTools()}else toast(r.data?.message||'Could not update block',true)}
+function openNewChat(){document.getElementById('new-chat-modal').style.display='flex';document.getElementById('new-chat-search').focus()}
+function closeNewChat(){document.getElementById('new-chat-modal').style.display='none';document.getElementById('new-chat-results').innerHTML=''}
+let newTimer;document.getElementById('new-chat-search').addEventListener('input',()=>{clearTimeout(newTimer);const q=document.getElementById('new-chat-search').value.trim();if(!q){document.getElementById('new-chat-results').innerHTML='<div class="small-note">Search by username to find a real CampusConnect user.</div>';return}newTimer=setTimeout(async()=>{const r=await apiFetch('/api/users/search?q='+encodeURIComponent(q));const out=document.getElementById('new-chat-results');out.innerHTML=r.ok&&r.data.length?r.data.map(u=>`<button class="conversation-btn" onclick="closeNewChat();selectChat(${u.id},'${escapeHtml(u.username)}')"><div class="conv-avatar">${escapeHtml((u.username||'?')[0].toUpperCase())}</div><div class="conv-body"><b>@${escapeHtml(u.username)}</b><div class="conv-preview">${escapeHtml(u.fullName||'CampusConnect student')}</div></div></button>`).join(''):emptyStateHTML({icon:ICONS.search,title:'No users found',body:'Try another username.'})},220)});
+document.getElementById('chat-search').addEventListener('input',()=>{clearTimeout(window.__chatSearch);window.__chatSearch=setTimeout(loadChats,180)});
+document.getElementById('attachment-input').addEventListener('change',e=>{const f=e.target.files?.[0];if(f)uploadAttachment(f);e.target.value=''})
+const emojis=['😀','😂','😊','😍','👍','❤️','🔥','🎉','🙏','👏','😎','🤝','📚','🎓','💡','✨','🚀','☕','📌','💬'];document.getElementById('emoji-picker').innerHTML=emojis.map(e=>`<button style="border:0;background:transparent;font-size:22px;padding:3px" onclick="insertEmoji('${e}')">${e}</button>`).join('');function toggleEmojiPicker(){const e=document.getElementById('emoji-picker');e.style.display=e.style.display==='none'?'block':'none'}function insertEmoji(e){const i=document.getElementById('message-input');i.value+=e;i.focus();document.getElementById('emoji-picker').style.display='none'}
+function openChatProfile(){const card=document.getElementById('chat-profile-card');if(activeUser&&card)card.hidden=!card.hidden}
+function openGemini(){showChatSection('gemini',document.querySelector('.chat-wa-tab[onclick*="gemini"]'))}
+function closeGemini(){document.getElementById('chat-gemini-page').hidden=true}
+function useGeminiPrompt(q){document.getElementById('gemini-input').value=q;document.getElementById('gemini-input').focus()}
+let geminiAttachment=null;
+function geminiHistory(){try{return JSON.parse(localStorage.getItem('cc_gemini_history')||'[]')}catch{return[]}}
+function renderGeminiHistory(){const box=document.getElementById('gemini-history');if(!box)return;const h=geminiHistory();box.innerHTML=h.length?h.slice(-20).map(x=>`<div class="chat-gemini-turn"><b>You</b><div>${escapeHtml(x.q)}</div><small>${escapeHtml(x.a||'')}</small></div>`).join(''):'Your Gemini history will appear here.';box.scrollTop=box.scrollHeight}
+async function attachGeminiFile(file){if(!file)return;if(file.size>50*1024*1024)return toast('Gemini files must be 50MB or smaller',true);const fd=new FormData();fd.append('file',file);const up=await apiFetch('/api/upload',{method:'POST',body:fd});if(!up.ok)return toast(up.data?.message||'Could not upload file',true);geminiAttachment={url:up.data.url,type:up.data.type||file.type,name:file.name};document.getElementById('gemini-attachment').textContent='Attached: '+file.name}
+async function sendGemini(){const input=document.getElementById('gemini-input'),answer=document.getElementById('gemini-answer'),q=input.value.trim();if(!q)return;answer.textContent='Gemini is thinking…';const r=await apiFetch('/api/ai/ask',{method:'POST',body:JSON.stringify({prompt:q})});const a=r.ok?(r.data?.response||'No response.'):(r.data?.message||'Gemini is unavailable. Check the API configuration.');answer.textContent=a;const h=geminiHistory();h.push({q,a,createdAt:new Date().toISOString()});localStorage.setItem('cc_gemini_history',JSON.stringify(h.slice(-100)));input.value='';renderGeminiHistory()}
+
+async function showChatSection(section,btn){
+ document.querySelectorAll('.chat-wa-tab').forEach(x=>x.classList.remove('active'));btn?.classList.add('active');
+ document.querySelectorAll('.chat-wa-tab').forEach(x=>x.setAttribute('aria-selected',String(x===btn)));
+ const updates=document.getElementById('chat-updates-panel'),layout=document.getElementById('layout'),calls=document.getElementById('call-history-panel');
+ updates.style.display='none';calls.classList.remove('show');document.getElementById('chat-gemini-page').hidden=true;layout.style.display='grid';
+ if(section==='updates'){layout.style.display='none';updates.style.display='flex';await loadChatUpdates();return;}
+ if(section==='calls'){layout.style.display='none';await loadCallHistory();calls.classList.add('show');return;}
+ if(section==='gemini'){layout.style.display='none';document.getElementById('chat-gemini-page').hidden=false;renderGeminiHistory();document.getElementById('gemini-input').focus();return;}
+ document.getElementById('chat-profile-card').hidden=true;loadChats();
+}
+async function loadCallHistory(){
+ const box=document.getElementById('chat-call-history-list');box.innerHTML=skeletonPosts(2);
+ const r=await apiFetch('/api/calls/history');
+ if(!r.ok){box.innerHTML=emptyStateHTML({icon:ICONS.chats,title:'No call history',body:'Completed voice and video calls will appear here.'});return;}
+ const rows=r.data||[];
+ box.innerHTML=rows.length?rows.map(x=>{const id=Number(x.userId||x.otherUserId||x.id||0);const username=x.username||x.otherUsername||'student';const name=x.name||x.fullName||x.otherFullName||username;return `<button class="call-history-row" onclick="openCallChoice(${id},'${escapeHtml(username)}','${escapeHtml(name)}')"><span class="call-history-avatar">${escapeHtml(name[0]?.toUpperCase()||'?')}</span><span class="call-history-main"><b>${escapeHtml(name)}</b><small>@${escapeHtml(username)} · ${escapeHtml(x.type||'Call')} · ${timeAgo(x.createdAt)}</small></span><span class="call-history-type">CALL</span></button>`}).join(''):'<div class="empty-state"><div class="empty-title">No calls yet</div><div class="empty-body">Your call history will appear here.</div></div>';
+}
+let callChoiceUser=null;
+function openCallChoice(id,username,name){callChoiceUser={id:Number(id),username,name};document.getElementById('call-choice-name').textContent=name||('@'+username);const m=document.getElementById('call-choice-modal');m.classList.add('show');m.setAttribute('aria-hidden','false')}
+function closeCallChoice(){const m=document.getElementById('call-choice-modal');m.classList.remove('show');m.setAttribute('aria-hidden','true');callChoiceUser=null}
+function startHistoryCall(mode){if(!callChoiceUser)return;const u=callChoiceUser;closeCallChoice();activeUser={id:u.id,username:u.username};openCall(mode)}
+
+async function loadChatUpdates(){
+ const box=document.getElementById('chat-status-list');box.innerHTML=skeletonPosts(2);
+ const r=await apiFetch('/api/statuses?scope=chat');if(!r.ok){box.innerHTML=notConnectedStateHTML();return}
+ const rows=(r.data||[]).slice(0,30);
+ box.innerHTML=rows.length?rows.map(st=>`<button class="conversation-btn" onclick="viewChatStatus(${st.id})"><div class="conv-avatar">${st.profilePictureUrl?`<img src="${escapeHtml(st.profilePictureUrl)}">`:escapeHtml((st.username||'?')[0].toUpperCase())}</div><div class="conv-body"><div class="conv-name">${escapeHtml(st.fullName||st.username||'Student')}</div><div class="conv-preview">@${escapeHtml(st.username||'user')} · ${escapeHtml(st.caption||'New status')}</div></div></button>`).join(''):emptyStateHTML({icon:ICONS.chats,title:'No updates yet',body:'Statuses from people you can chat with will appear here.'});
+}
+async function viewChatStatus(id){if(typeof viewStatus==='function')return viewStatus(id);const r=await apiFetch('/api/statuses');const st=r.data?.find(x=>Number(x.id)===Number(id));if(!st)return;alert(st.caption||'Status')}
+function closeChat(fromPopState=false){if(!fromPopState&&history.state?.ccChatConversation){history.back();return}document.getElementById('layout').classList.remove('open');activeUser=null;document.getElementById('chat-profile-card').hidden=true;renderTools()}
+document.getElementById('message-input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}});
+(async()=>{await loadChats();renderGeminiHistory();const p=new URLSearchParams(location.search);const uid=p.get('userId');if(uid)selectChat(Number(uid),p.get('username')||'student',p.get('productId'));})();
+    </script>
+</body>
+
+</html>
+
+<style>
+    .official-chat-section {
+        padding: 4px 0 8px;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 5px
+    }
+    
+    .official-chat-title {
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--primary);
+        padding: 8px 12px 5px
+    }
+    
+    .official-avatar {
+        background: linear-gradient(135deg, #6D5DFC, #0EA5E9);
+        color: #fff
+    }
+    
+    .verified-badge {
+        display: inline-grid;
+        place-items: center;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        background: #6D5DFC;
+        color: #fff;
+        font-size: 9px;
+        margin-left: 3px
+    }
+</style>

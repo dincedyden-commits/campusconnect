@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: campusconnect
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "3306"
+      - key: DB_NAME
+        value: campusconnect
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.8-flash
+      - key: STORAGE_ENABLED
+        value: "false"
+      - key: STORAGE_ENDPOINT
+        sync: false
+      - key: STORAGE_BUCKET
+        value: campusconnect-media
+      - key: STORAGE_ACCESS_KEY
+        sync: false
+      - key: STORAGE_SECRET_KEY
+        sync: false
+      - key: STORAGE_REGION
+        value: us-east-1
+      - key: STORAGE_PUBLIC_BASE_URL
+        sync: false
+      - key: SYSTEM_ACCOUNTS_ENABLED
+        value: "true"
+      - key: SYSTEM_OFFICIAL_PASSWORD
+        sync: false
+      - key: SYSTEM_ADMIN_PASSWORD
+        sync: false

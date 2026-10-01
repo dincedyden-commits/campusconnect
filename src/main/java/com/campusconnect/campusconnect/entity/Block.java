@@ -1,0 +1,4 @@
+package com.campusconnect.campusconnect.entity;
+import jakarta.persistence.*;
+@Entity @Table(name="user_blocks", uniqueConstraints=@UniqueConstraint(columnNames={"blocker_id","blocked_id"}))
+public class Block { @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id; @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="blocker_id",nullable=false) private User blocker; @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="blocked_id",nullable=false) private User blocked; public Long getId(){return id;} public User getBlocker(){return blocker;} public void setBlocker(User u){blocker=u;} public User getBlocked(){return blocked;} public void setBlocked(User u){blocked=u;} }

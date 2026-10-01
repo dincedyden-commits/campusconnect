@@ -1,0 +1,7 @@
+CampusConnect deployment package
+================================
+
+1. Push the contents of this folder to a GitHub repository.
+2. On Render, create a Docker Web Service from that repository.
+3. Configure the database and secrets listed in .env.example / render.yaml.
+4. Deploy and test /api/health.

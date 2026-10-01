@@ -1,0 +1,32 @@
+# Maven
+target/
+.mvn/wrapper/maven-wrapper.jar
+
+# Runtime media (use S3/R2 in production)
+uploads/
+
+# Logs
+*.log
+
+# Local secrets
+.env
+.env.*
+!.env.example
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+.springBeans
+.sts4-cache
+.apt_generated
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

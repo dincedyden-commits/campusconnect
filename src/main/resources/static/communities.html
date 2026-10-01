@@ -1,0 +1,673 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <title>Groups & Channels · CampusConnect</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .community-page {
+            min-height: 100vh;
+            background: var(--bg);
+            padding-bottom: 84px
+        }
+        
+        .community-shell {
+            max-width: 900px;
+            margin: auto
+        }
+        
+        .comm-top {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            min-height: 68px;
+            background: rgba(255, 255, 255, .94);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--line)
+        }
+        
+        .comm-top h1 {
+            font-size: 20px
+        }
+        
+        .comm-top p {
+            font-size: 11px;
+            color: var(--ink-soft);
+            margin-top: 2px
+        }
+        
+        .comm-back {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: var(--bg)
+        }
+        
+        .comm-top-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 7px
+        }
+        
+        .comm-top-actions .btn {
+            padding: 9px 12px;
+            font-size: 12px
+        }
+        
+        .comm-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: var(--surface);
+            border-bottom: 1px solid var(--line);
+            position: sticky;
+            top: 68px;
+            z-index: 9
+        }
+        
+        .comm-tab {
+            position: relative;
+            padding: 14px;
+            border: 0;
+            background: transparent;
+            font-weight: 800;
+            color: var(--ink-soft);
+            cursor: pointer
+        }
+        
+        .comm-tab.active {
+            color: var(--primary)
+        }
+        
+        .comm-tab.active:after {
+            content: "";
+            position: absolute;
+            left: 18%;
+            right: 18%;
+            bottom: -1px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 3px 3px 0 0
+        }
+        
+        .comm-body {
+            padding: 14px
+        }
+        
+        .comm-hero {
+            background: linear-gradient(135deg, #15152b, #4f46e5);
+            color: #fff;
+            border-radius: 22px;
+            padding: 20px;
+            margin-bottom: 14px;
+            position: relative;
+            overflow: hidden
+        }
+        
+        .comm-hero:after {
+            content: "";
+            position: absolute;
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
+            right: -70px;
+            top: -80px;
+            background: rgba(255, 255, 255, .1)
+        }
+        
+        .comm-hero h2 {
+            font-size: 22px;
+            margin-bottom: 5px
+        }
+        
+        .comm-hero p {
+            max-width: 620px;
+            color: rgba(255, 255, 255, .78);
+            font-size: 13px;
+            line-height: 1.5
+        }
+        
+        .comm-hero-actions {
+            display: flex;
+            gap: 7px;
+            margin-top: 14px;
+            flex-wrap: wrap
+        }
+        
+        .comm-hero-actions .btn {
+            background: #fff;
+            color: #15152b;
+            border: 0
+        }
+        
+        .comm-search {
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 12px;
+            padding: 12px 14px;
+            border: 1px solid var(--line);
+            border-radius: 13px;
+            background: var(--surface);
+            outline: 0
+        }
+        
+        .comm-search:focus {
+            border-color: var(--primary)
+        }
+        
+        .community-list {
+            display: grid;
+            gap: 10px
+        }
+        
+        .community-row {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            background: var(--surface);
+            padding: 14px;
+            border-radius: 17px;
+            border: 1px solid var(--line);
+            box-shadow: 0 6px 20px rgba(20, 20, 43, .035)
+        }
+        
+        .comm-avatar {
+            width: 54px;
+            height: 54px;
+            border-radius: 17px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #fff;
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+            font-size: 19px;
+            flex: none
+        }
+        
+        .comm-main {
+            min-width: 0;
+            flex: 1
+        }
+        
+        .comm-name {
+            font-weight: 850;
+            display: flex;
+            gap: 7px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+        
+        .comm-preview {
+            color: var(--ink-soft);
+            font-size: 13px;
+            line-height: 1.4;
+            margin-top: 4px
+        }
+        
+        .comm-meta {
+            font-size: 11px;
+            color: var(--ink-faint);
+            margin-top: 5px
+        }
+        
+        .comm-badge {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--primary);
+            font-weight: 900;
+            background: var(--primary-soft);
+            padding: 4px 7px;
+            border-radius: 999px
+        }
+        
+        .comm-actions {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap
+        }
+        
+        .comm-actions .btn {
+            font-size: 11px;
+            padding: 8px 10px
+        }
+        
+        .community-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(8, 10, 20, .68);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 14px;
+            z-index: 50
+        }
+        
+        .community-modal.show {
+            display: flex
+        }
+        
+        .community-box {
+            background: var(--surface);
+            color: var(--ink);
+            width: min(720px, 100%);
+            max-height: 92vh;
+            overflow: auto;
+            border-radius: 22px;
+            padding: 18px
+        }
+        
+        .community-box input,
+        .community-box textarea {
+            width: 100%;
+            box-sizing: border-box;
+            margin: 7px 0;
+            padding: 12px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: var(--bg);
+            font: inherit;
+            color: var(--ink)
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 10px
+        }
+        
+        .wa-community-chat {
+            height: min(620px, 75vh);
+            display: flex;
+            flex-direction: column;
+            background: #efeae2;
+            border-radius: 16px;
+            overflow: hidden
+        }
+        
+        .wa-chat-head {
+            padding: 11px 14px;
+            background: var(--surface);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--line)
+        }
+        
+        .wa-chat-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #fff;
+            display: grid;
+            place-items: center;
+            font-weight: 900
+        }
+        
+        .wa-community-messages {
+            flex: 1;
+            overflow: auto;
+            padding: 15px
+        }
+        
+        .cm-wrap {
+            display: flex;
+            margin: 4px 0
+        }
+        
+        .cm-wrap.mine {
+            justify-content: flex-end
+        }
+        
+        .cm-bubble {
+            max-width: 75%;
+            background: #fff;
+            padding: 8px 10px;
+            border-radius: 9px;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .08)
+        }
+        
+        .cm-wrap.mine .cm-bubble {
+            background: #d9fdd3
+        }
+        
+        .cm-author {
+            font-size: 10px;
+            font-weight: 800;
+            color: #667781;
+            margin-bottom: 3px
+        }
+        
+        .cm-time {
+            display: block;
+            text-align: right;
+            color: #667781;
+            font-size: 9px;
+            margin-top: 3px
+        }
+        
+        .community-compose {
+            display: flex;
+            gap: 7px;
+            padding: 9px;
+            background: #f0f2f5
+        }
+        
+        .community-compose input {
+            margin: 0!important;
+            flex: 1;
+            border-radius: 22px!important
+        }
+        
+        .member-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--line)
+        }
+        
+        .role {
+            font-size: 10px;
+            color: var(--primary);
+            font-weight: 800
+        }
+        
+        .empty-community {
+            background: var(--surface);
+            border: 1px dashed var(--line);
+            border-radius: 22px;
+            padding: 42px 22px;
+            text-align: center
+        }
+        
+        .empty-community .empty-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            display: grid;
+            place-items: center;
+            margin: 0 auto 14px
+        }
+        
+        .empty-community h3 {
+            font-size: 19px
+        }
+        
+        .empty-community p {
+            max-width: 430px;
+            margin: 7px auto 15px;
+            color: var(--ink-soft);
+            font-size: 13px;
+            line-height: 1.5
+        }
+        
+        .empty-community .btn {
+            display: inline-flex;
+            margin: 3px;
+            width: auto
+        }
+        
+        @media(max-width:650px) {
+            .comm-top-actions .btn {
+                font-size: 0;
+                width: 40px;
+                height: 40px;
+                padding: 0
+            }
+            .comm-top-actions .btn:before {
+                content: '+';
+                font-size: 21px
+            }
+            .community-row {
+                align-items: flex-start
+            }
+            .comm-actions {
+                width: 100%;
+                margin-top: 8px
+            }
+            .comm-actions .btn {
+                flex: 1
+            }
+            .community-row {
+                flex-wrap: wrap
+            }
+            .comm-main {
+                width: calc(100% - 70px)
+            }
+        }
+        
+        .settings-toggle {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 11px 0;
+            font-size: 13px;
+            font-weight: 700
+        }
+        
+        .settings-toggle input {
+            width: 18px;
+            height: 18px
+        }
+    </style>
+</head>
+
+<body data-page="communities" class="community-page">
+    <div id="app" class="community-page">
+        <div class="community-shell">
+            <header class="comm-top"><button class="comm-back" onclick="goBack('/chats.html')">←</button>
+                <div>
+                    <h1>Groups & Channels</h1>
+                    <p>Connect around your campus interests</p>
+                </div>
+                <div class="comm-top-actions"><button class="btn btn-primary btn-auto" onclick="openCreate('GROUP')">New group</button><button class="btn btn-ghost btn-auto" onclick="openCreate('CHANNEL')">New channel</button></div>
+            </header>
+            <div class="comm-tabs"><button class="comm-tab active" id="tab-groups" onclick="setTab('GROUP')">Groups</button><button class="comm-tab" id="tab-channels" onclick="setTab('CHANNEL')">Channels</button></div>
+            <main class="comm-body">
+                <section class="comm-hero">
+                    <h2 id="hero-title">Find your campus groups</h2>
+                    <p id="hero-text">Join communities for courses, clubs, residence life and student interests. Only communities that exist in your CampusConnect database appear here.</p>
+                    <div class="comm-hero-actions"><button class="btn btn-auto" onclick="openCreate('GROUP')">＋ Create group</button><button class="btn btn-auto" onclick="openCreate('CHANNEL')">＋ Create channel</button></div>
+                </section><input class="comm-search" id="community-search" placeholder="Search groups…" autocomplete="off">
+                <div id="community-grid" class="community-list"></div>
+            </main>
+            <nav class="bottom-nav" aria-label="Primary navigation">
+                <a class="nav-item" data-nav="home" href="/index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg><span>Home</span></a>
+                <a class="nav-item" data-nav="search" href="/search.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.2-4.2"/></svg><span>Search</span></a>
+                <button class="nav-item nav-post" data-nav="post" onclick="location.href='/index.html?compose=1'" aria-label="Create post"><span class="post-plus"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span><span>Post</span></button>
+                <button class="nav-item nav-ai" data-nav="ai" onclick="if(typeof openGemini==='function'){openGemini()}else{location.href='/chats.html?ai=1'}" aria-label="Open Campus AI"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7L12 3Z"/><path d="m19 16 .7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16Z"/></svg><span>Campus AI</span></button>
+                <a class="nav-item" data-nav="profile" href="/profile.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.5-4.4 3.2-7 8-7s7.5 2.6 8 7"/><path d="M19 3.8v3.4M17.3 5.5h3.4"/></svg><span>Profile</span></a>
+            </nav>
+        </div>
+        <div class="community-modal" id="create-modal">
+            <div class="community-box">
+                <h3 id="create-title">Create group</h3>
+                <p class="small-note" id="create-subtitle">Create a real community for CampusConnect students.</p><label class="community-avatar-upload"><span id="community-avatar-preview" class="comm-avatar">+</span><span><b>Add a group photo</b><small>Optional · JPG, PNG or WEBP</small></span><input id="community-avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden></label>
+                <input
+                    id="community-name" maxlength="100" placeholder="Group name"><textarea id="community-description" maxlength="500" placeholder="Description (optional)"></textarea>
+                    <div class="modal-actions"><button class="btn btn-ghost btn-auto" onclick="closeCreate()">Cancel</button><button class="btn btn-primary btn-auto" onclick="submitCreate()">Create</button></div>
+            </div>
+        </div>
+        <div class="community-modal" id="member-modal">
+            <div class="community-box">
+                <h3 id="member-title">Members</h3><input id="member-search" placeholder="Search username to add" autocomplete="off">
+                <div id="member-results"></div>
+                <div id="member-list"></div>
+                <div class="modal-actions"><button class="btn btn-ghost btn-auto" onclick="closeMembers()">Close</button></div>
+            </div>
+        </div>
+        <div class="community-modal" id="chat-modal">
+            <div class="community-box">
+                <div class="wa-community-chat">
+                    <div class="wa-chat-head">
+                        <div class="wa-chat-avatar" id="community-avatar">?</div>
+                        <div style="min-width:0"><b id="community-chat-title">Community</b>
+                            <div id="community-chat-type" class="small-note"></div>
+                        </div><button class="btn btn-ghost btn-auto" id="community-settings-button" onclick="openCommunitySettings()">Settings</button><button style="margin-left:auto" class="btn btn-ghost btn-auto" onclick="closeCommunityChat()">Close</button></div>
+                    <div id="community-messages"
+                        class="wa-community-messages"></div>
+                    <div class="community-compose"><input id="community-input" maxlength="4000" placeholder="Write a message…"><button class="btn btn-primary btn-auto" onclick="sendCommunityMessage()">Send</button></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="community-modal" id="community-settings-modal">
+            <div class="community-box">
+                <h3>Group settings</h3>
+                <p class="small-note">Owners and admins can control how the group works.</p>
+                <label class="settings-toggle"><input id="setting-admin-only" type="checkbox"> Only admins can send messages</label>
+                <label class="settings-toggle"><input id="setting-anon" type="checkbox"> Allow anonymous confessions</label>
+                <label class="settings-toggle"><input id="setting-disappear" type="checkbox"> Disappearing messages</label>
+                <select id="setting-disappear-time" class="form-input"><option value="24h">24 hours</option><option value="1w">1 week</option><option value="1m">1 month</option><option value="3m">3 months</option></select>
+                <div class="modal-actions"><button class="btn btn-ghost btn-auto" onclick="closeCommunitySettings()">Cancel</button><button class="btn btn-primary btn-auto" onclick="saveCommunitySettings()">Save settings</button></div>
+            </div>
+        </div>
+        <div id="toast-host"></div>
+    </div>
+    <script src="/js/app.js"></script>
+    <script>
+        let createType = 'GROUP',
+            activeCommunity = null,
+            currentTab = 'GROUP',
+            allCommunities = [],
+            communityAvatarUrl = '';
+
+        function openCreate(type) {
+            createType = type;
+            communityAvatarUrl = '';
+            document.getElementById('community-avatar-file').value = '';
+            document.getElementById('community-avatar-preview').textContent = '+';
+            document.getElementById('community-avatar-preview').style.backgroundImage = '';
+            document.querySelector('.community-avatar-upload').hidden = type !== 'GROUP';
+            document.getElementById('create-title').textContent = type === 'GROUP' ? 'Create a group' : 'Create a channel';
+            document.getElementById('create-subtitle').textContent = type === 'GROUP' ? 'Create a space for conversations and collaboration.' : 'Create a channel for announcements and updates.';
+            document.getElementById('community-name').placeholder = type === 'GROUP' ? 'Group name' : 'Channel name';
+            document.getElementById('community-name').value = '';
+            document.getElementById('community-description').value = '';
+            document.getElementById('create-modal').classList.add('show');
+            setTimeout(() => document.getElementById('community-name').focus(), 50)
+        }
+
+        function closeCreate() {
+            document.getElementById('create-modal').classList.remove('show')
+        }
+
+        function setTab(type) {
+            currentTab = type;
+            document.getElementById('tab-groups').classList.toggle('active', type === 'GROUP');
+            document.getElementById('tab-channels').classList.toggle('active', type === 'CHANNEL');
+            document.getElementById('community-search').placeholder = type === 'GROUP' ? 'Search groups…' : 'Search channels…';
+            document.getElementById('hero-title').textContent = type === 'GROUP' ? 'Find your campus groups' : 'Follow useful campus channels';
+            document.getElementById('hero-text').textContent = type === 'GROUP' ? 'Join communities for courses, clubs, residence life and student interests.' : 'Follow announcement and information channels created by real CampusConnect users.';
+            render()
+        }
+        async function submitCreate() {
+            const name = document.getElementById('community-name').value.trim(),
+                description = document.getElementById('community-description').value.trim();
+            if (!name) return toast('Give it a name', true);
+            const file = document.getElementById('community-avatar-file').files?.[0];
+            if (file) {
+                if (file.size > 10 * 1024 * 1024) return toast('Group photos must be 10MB or smaller', true);
+                const form = new FormData();
+                form.append('file', file);
+                const upload = await apiFetch('/api/upload', {
+                    method: 'POST',
+                    body: form
+                });
+                if (!upload.ok) return toast(upload.data?.message || 'Could not upload group photo', true);
+                communityAvatarUrl = upload.data.url
+            }
+            const r = await apiFetch('/api/communities', {
+                method: 'POST',
+                body: JSON.stringify({
+                    name,
+                    type: createType,
+                    description,
+                    profilePictureUrl: communityAvatarUrl
+                })
+            });
+            if (r.ok) {
+                closeCreate();
+                toast(createType === 'GROUP' ? 'Group created' : 'Channel created');
+                await load()
+            } else toast(r.data?.message || 'Could not create', true)
+        }
+        async function load() {
+            const me = await requireLogin();
+            if (!me) return;
+            const r = await apiFetch('/api/communities');
+            if (!r.ok) {
+                document.getElementById('community-grid').innerHTML = notConnectedStateHTML();
+                return
+            }
+            allCommunities = r.data || [];
+            const requested = new URLSearchParams(location.search).get('type');
+            if (requested === 'CHANNEL' || requested === 'GROUP') setTab(requested);
+            else render()
+        }
+
+        function emptyCommunityHTML() {
+            const isGroup = currentTab === 'GROUP';
+            return `<div class="empty-community"><div class="empty-icon"><svg viewBox="0 0 24 24" width="30" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><path d="M3.5 19c.6-3.1 2.4-4.7 5.5-4.7s4.9 1.6 5.5 4.7M16 5.5a3 3 0 010 5.8M17 14.5c2.1.3 3.4 1.7 3.8 4"/></svg></div><h3>No ${isGroup?'groups':'channels'} yet</h3><p>There are no ${isGroup?'groups':'channels'} matching this view. Create the first one using your real CampusConnect account.</p><button class="btn btn-primary btn-auto" onclick="openCreate('${currentTab}')">＋ Create ${isGroup?'group':'channel'}</button></div>`
+        }
+
+        function render() {
+            const q = document.getElementById('community-search').value.trim().toLowerCase();
+            const data = allCommunities.filter(c => c.type === currentTab && ((c.name || '').toLowerCase().includes(q) || (c.description || '').toLowerCase().includes(q)));
+            const g = document.getElementById('community-grid');
+            g.innerHTML = data.length ? data.map(c => {
+                        const initial = (c.name || '?')[0].toUpperCase();
+                        return `<article class="community-row"><div class="comm-avatar">${c.profilePictureUrl?`<img src="${escapeHtml(c.profilePictureUrl)}" alt="">`:escapeHtml(initial)}</div><div class="comm-main"><div class="comm-name">${escapeHtml(c.name)} <span class="comm-badge">${c.type==='GROUP'?'Group':'Channel'}</span></div><div class="comm-preview">${escapeHtml(c.description||'No description provided.')}</div><div class="comm-meta">Created by @${escapeHtml(c.ownerUsername||'user')}</div><div class="comm-actions"><button class="btn btn-primary btn-auto" onclick="join(${c.id})">Join</button><button class="btn btn-ghost btn-auto" onclick="openCommunityChat(${c.id},'${escapeHtml(c.name)}','${escapeHtml(c.type)}','${encodeURIComponent(c.profilePictureUrl||'')}')">Open</button>${c.canManage?`<button class="btn btn-ghost btn-auto" onclick="manage(${c.id},'${escapeHtml(c.name)}')">Members</button>`:''}</div></div></article>`}).join(''):emptyCommunityHTML()}
+async function join(id){const r=await apiFetch('/api/communities/'+id+'/join',{method:'POST'});toast(r.ok?'Joined successfully':(r.data?.message||'Could not join'),!r.ok)}
+async function manage(id,name){const r=await apiFetch('/api/communities/'+id+'/members');if(!r.ok)return toast(r.data?.message||'Join this community first',true);document.getElementById('member-title').textContent=name+' · Members';document.getElementById('member-modal').classList.add('show');renderMembers(id,r.data);const input=document.getElementById('member-search');input.value='';input.oninput=async()=>{const q=input.value.trim();if(!q){document.getElementById('member-results').innerHTML='';return}const u=await apiFetch('/api/users/search?q='+encodeURIComponent(q));document.getElementById('member-results').innerHTML=(u.data||[]).filter(x=>!r.data.some(m=>Number(m.userId)===Number(x.id))).slice(0,8).map(x=>`<button class="conversation-btn" onclick="memberAction(${id},${x.id},'add')">@${escapeHtml(x.username)} · Add</button>`).join('')}}
+function renderMembers(id,data){document.getElementById('member-list').innerHTML=(data||[]).map(m=>`<div class="member-row"><div><b>@${escapeHtml(m.username)}</b> <span class="role">${escapeHtml(m.role)}</span></div><div>${m.role!=='OWNER'?`<button class="btn btn-ghost btn-auto" onclick="memberAction(${id},${m.userId},'remove')">Remove</button>`:''}${m.role==='MEMBER'?`<button class="btn btn-ghost btn-auto" onclick="memberAction(${id},${m.userId},'admin')">Make admin</button>`:''}${m.role==='ADMIN'?`<button class="btn btn-ghost btn-auto" onclick="memberAction(${id},${m.userId},'unadmin')">Remove admin</button>`:''}</div></div>`).join('')}
+async function memberAction(cid,uid,action){let rr;if(action==='add')rr=await apiFetch(`/api/communities/${cid}/members/${uid}`,{method:'POST'});if(action==='remove')rr=await apiFetch(`/api/communities/${cid}/members/${uid}`,{method:'DELETE'});if(action==='admin')rr=await apiFetch(`/api/communities/${cid}/admins/${uid}`,{method:'POST'});if(action==='unadmin')rr=await apiFetch(`/api/communities/${cid}/admins/${uid}`,{method:'DELETE'});if(rr?.ok){toast('Updated');const r=await apiFetch('/api/communities/'+cid+'/members');if(r.ok)renderMembers(cid,r.data)}else toast(rr?.data?.message||'Could not update member',true)}
+function closeMembers(){document.getElementById('member-modal').classList.remove('show')}
+async function openCommunityChat(id,name,type,avatarUrl=''){avatarUrl=decodeURIComponent(avatarUrl);const community=allCommunities.find(c=>Number(c.id)===Number(id));const r=await apiFetch('/api/community-messages/'+id);if(!r.ok)return toast(r.data?.message||'Join the community first',true);activeCommunity={id,name,type,avatarUrl,canManage:!!community?.canManage};document.getElementById('community-chat-title').textContent=name;document.getElementById('community-chat-type').textContent=type==='GROUP'?'Group conversation':'Channel updates';const avatar=document.getElementById('community-avatar');avatar.innerHTML=avatarUrl?`<img src="${escapeHtml(avatarUrl)}" alt="">`:escapeHtml((name||'?')[0].toUpperCase());document.getElementById('community-settings-button').hidden=!activeCommunity.canManage;document.getElementById('chat-modal').classList.add('show');renderCommunityMessages(r.data);applyCommunityInputRules()}
+function renderCommunityMessages(data){const box=document.getElementById('community-messages');box.innerHTML=data.length?data.map(m=>{const mine=Number(m.senderId)===Number(CURRENT_USER_ID);return `<div class="cm-wrap ${mine?'mine':''}"><div class="cm-bubble"><div class="cm-author">${mine?'You':'@'+escapeHtml(m.senderUsername)}</div><div>${escapeHtml(m.content)}</div><span class="cm-time">${timeAgo(m.createdAt)}</span></div></div>`}).join(''):'<div class="empty-state"><div class="empty-title">No messages yet</div><div class="empty-body">Start the first real conversation in this community.</div></div>';box.scrollTop=box.scrollHeight}
+function communitySettingsKey(id){return 'cc_group_settings_'+id}
+function getCommunitySettings(id){try{return JSON.parse(localStorage.getItem(communitySettingsKey(id))||'{}')}catch{return{}}}
+function openCommunitySettings(){
+ if(!activeCommunity)return;
+ const st=getCommunitySettings(activeCommunity.id);
+ document.getElementById('setting-admin-only').checked=!!st.adminOnly;
+ document.getElementById('setting-anon').checked=!!st.anonymous;
+ document.getElementById('setting-disappear').checked=!!st.disappear;
+ document.getElementById('setting-disappear-time').value=st.disappearTime||'24h';
+ document.getElementById('community-settings-modal').classList.add('show');
+}
+function closeCommunitySettings(){document.getElementById('community-settings-modal').classList.remove('show')}
+async function saveCommunitySettings(){
+ if(!activeCommunity)return;
+ const st={adminOnly:document.getElementById('setting-admin-only').checked,anonymous:document.getElementById('setting-anon').checked,disappear:document.getElementById('setting-disappear').checked,disappearTime:document.getElementById('setting-disappear-time').value};
+ localStorage.setItem(communitySettingsKey(activeCommunity.id),JSON.stringify(st));
+ const r=await apiFetch('/api/communities/'+activeCommunity.id+'/settings',{method:'PUT',body:JSON.stringify(st)});
+ closeCommunitySettings();toast(r.ok?'Group settings saved':'Group settings saved on this device');applyCommunityInputRules();
+}
+function applyCommunityInputRules(){
+ if(!activeCommunity)return;
+ const st=getCommunitySettings(activeCommunity.id),input=document.getElementById('community-input'),send=input?.nextElementSibling;
+ const locked=activeCommunity.type==='CHANNEL'||!!st.adminOnly;
+ if(input){input.disabled=locked;input.placeholder=locked?'Only admins can send messages':'Write a message…';}
+ if(send)send.disabled=locked;
+}
+async function sendCommunityMessage(){if(!activeCommunity)return;const st=getCommunitySettings(activeCommunity.id);if(activeCommunity.type==='CHANNEL'||st.adminOnly)return toast('Only admins can send messages in this community',true);const input=document.getElementById('community-input'),text=input.value.trim();if(!text)return;const r=await apiFetch('/api/community-messages/'+activeCommunity.id,{method:'POST',body:JSON.stringify({content:text})});if(r.ok){input.value='';const all=await apiFetch('/api/community-messages/'+activeCommunity.id);if(all.ok)renderCommunityMessages(all.data)}else toast(r.data?.message||'Could not send',true)}
+function closeCommunityChat(){document.getElementById('chat-modal').classList.remove('show');activeCommunity=null}
+document.getElementById('community-avatar-file').addEventListener('change',e=>{const file=e.target.files?.[0];if(!file)return;const preview=document.getElementById('community-avatar-preview');preview.textContent='';preview.style.backgroundImage=`url("${URL.createObjectURL(file)}")`;preview.classList.add('has-photo')});document.getElementById('community-input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendCommunityMessage()}});document.getElementById('community-search').addEventListener('input',render);load();
+    </script>
+</body>
+
+</html>

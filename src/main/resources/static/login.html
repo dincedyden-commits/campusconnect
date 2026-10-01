@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log in · CampusConnect</title>
+<link rel="stylesheet" href="/css/styles.css">
+<style>
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.auth-card{width:min(390px,100%);padding:30px;background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:0 18px 50px rgba(0,0,0,.08)}
+.auth-brand{display:flex;justify-content:center;margin-bottom:26px}
+.welcome-copy{text-align:center;margin:-4px 0 20px}.welcome-copy h1{font-family:var(--font-display);font-size:25px;margin:0 0 7px}.welcome-copy p{margin:0;color:var(--ink-soft);font-size:13px;line-height:1.5}.auth-fields{display:grid;gap:12px}
+.auth-fields input{width:100%;box-sizing:border-box;padding:14px 15px;border:1px solid var(--line);border-radius:13px;background:var(--bg);font:inherit;color:var(--ink);outline:none}
+.auth-fields input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,91,255,.10)}
+.auth-card .btn-primary{width:100%;margin-top:4px}
+.auth-links{display:flex;justify-content:space-between;align-items:center;margin-top:16px;font-size:13px}
+.auth-links a{color:var(--primary);text-decoration:none}
+</style>
+</head>
+<body data-page="login" class="auth-page">
+<div id="app">
+  <div class="auth-wrap">
+    <form class="auth-card" autocomplete="off" onsubmit="handleLogin();return false;">
+      <div class="auth-brand">
+        <div class="logo-lockup"><div class="logo-mark cc-hook-logo"><span>C</span><span>C</span></div><div class="logo-word">Campus<span>Connect</span></div></div>
+      </div>
+      <div class="welcome-copy"><div class="welcome-pill">YOUR CAMPUS. YOUR PEOPLE.</div><h1>Welcome back</h1><p>Connect with your campus, discover people, share moments and stay in the loop.</p><div class="welcome-points"><span>• Chat</span><span>• Events</span><span>• Marketplace</span></div></div><div class="auth-fields">
+        <input id="login-id" type="text" placeholder="Email or username" autocomplete="username" autocapitalize="none" spellcheck="false" aria-label="Email or username">
+        <div class="field-input-wrap">
+          <input id="login-pw" type="password" placeholder="Password" autocomplete="new-password" aria-label="Password">
+          <button class="pw-toggle" type="button" onclick="togglePw('login-pw',this)" aria-label="Show password" title="Show password"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg></button>
+        </div>
+        <button class="btn btn-primary" type="submit">Log in</button>
+      </div>
+      <div class="auth-links">
+        <a href="/forgot-password.html">Forgot password?</a>
+        <a href="/register.html">Create account</a>
+      </div>
+    </form>
+  </div>
+  <div id="toast-host"></div>
+</div>
+<script src="/js/app.js"></script>
+<script>
+async function handleLogin(){
+  const identifier=document.getElementById('login-id').value.trim();
+  const password=document.getElementById('login-pw').value;
+  if(!identifier||!password){toast('Enter your email or username and password',true);return}
+  const r=await apiFetch('/api/auth/login',{method:'POST',body:JSON.stringify({identifier,password})});
+  if(r.ok){toast('Welcome back');setTimeout(()=>location.href='/index.html',300)}
+  else toast(r.data?.message||'Login failed',true);
+}
+</script>
+</body>
+</html>

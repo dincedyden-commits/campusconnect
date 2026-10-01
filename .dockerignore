@@ -1,0 +1,23 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Maven/build output
+target
+.mvn/wrapper/maven-wrapper.jar
+
+# Local runtime data
+uploads
+*.log
+
+# IDE/OS files
+.idea
+.vscode
+*.iml
+desktop.ini
+
+# Local secrets
+.env
+.env.*
+!.env.example
