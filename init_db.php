@@ -3,7 +3,7 @@
 
 // 1. Your Aiven connection (get from Aiven dashboard)
 $host = "campusconnect-db-dincedyden-d923.j.aivencloud.com"; // <-- replace
-$port = 22306; // <-- replace
+$port = 22306; 
 $user = "avnadmin";
 $pass = "AVNS_3iQY7HnujORV3vVmEPQ"; // <-- replace
 $db   = "defaultdb";
